@@ -425,64 +425,92 @@
             font-size: 14px;
         }
 
-        .users-list {
-            margin-top: 20px;
-        }
-
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
+        .search-section {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #4fc3f7;
-        }
-
-        .user-balance {
-            color: #ffb74d;
-        }
-        
-        .refresh-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: all 0.3s;
-        }
-        
-        .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-radius: 15px;
+            padding: 20px;
             margin-bottom: 20px;
         }
 
-        .search-users {
+        .search-box {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
 
-        .search-users input {
+        .search-box input {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.1);
             color: white;
+        }
+
+        .search-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+        }
+
+        .user-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .user-result:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(79, 195, 247, 0.3);
+        }
+
+        .user-result.selected {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: #4fc3f7;
+        }
+
+        .user-result-info {
+            flex: 1;
+        }
+
+        .user-result-name {
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .user-result-email {
+            font-size: 14px;
+            color: #bbdefb;
+            margin-top: 2px;
+        }
+
+        .user-result-balance {
+            color: #ffb74d;
+            font-weight: 600;
+            margin-left: 15px;
         }
 
         .empty-state {
@@ -495,6 +523,35 @@
             font-size: 48px;
             margin-bottom: 15px;
             opacity: 0.5;
+        }
+
+        .selected-user-display {
+            background: rgba(79, 195, 247, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        .selected-user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selected-user-text {
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .clear-selection {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
         }
 
         footer {
@@ -616,30 +673,32 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-header">
-                        <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
-                        <button class="refresh-btn" onclick="loadUsersList()">
-                            <i class="fas fa-sync-alt"></i> Обновить
-                        </button>
+                    <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
+                    
+                    <!-- Секция поиска пользователей -->
+                    <div class="search-section">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Введите имя или email пользователя...">
+                            <button type="button" class="search-btn" onclick="searchUsers()">
+                                <i class="fas fa-search"></i> Найти
+                            </button>
+                        </div>
+                        
+                        <div id="searchResults" class="search-results">
+                            <div class="empty-state">
+                                <i class="fas fa-search"></i>
+                                <p>Начните поиск пользователей</p>
+                            </div>
+                        </div>
+                        
+                        <div id="selectedUserDisplay" style="display: none;">
+                            <!-- Выбранный пользователь будет отображаться здесь -->
+                        </div>
                     </div>
                     
-                    <div class="users-list">
-                        <h4>Другие пользователи:</h4>
-                        <div class="search-users">
-                            <input type="text" id="searchUsers" placeholder="Поиск по имени или email..." oninput="filterUsers()">
-                        </div>
-                        <div id="usersList">
-                            <!-- Список пользователей будет загружен здесь -->
-                        </div>
-                    </div>
-                    
+                    <!-- Форма перевода -->
                     <form class="transfer-form" id="transferForm">
-                        <div class="form-group">
-                            <label for="recipient">Выберите получателя</label>
-                            <select id="recipient" required>
-                                <option value="" disabled selected>Выберите пользователя</option>
-                            </select>
-                        </div>
+                        <input type="hidden" id="recipientId">
                         
                         <div class="form-group">
                             <label for="amount">Сумма перевода (₽)</label>
@@ -651,8 +710,8 @@
                             <input type="text" id="message" placeholder="Например: За обед">
                         </div>
                         
-                        <button type="submit">
-                            <i class="fas fa-paper-plane"></i> Отправить перевод
+                        <button type="submit" id="transferBtn" disabled>
+                            <i class="fas fa-paper-plane"></i> Выберите получателя
                         </button>
                     </form>
 
@@ -678,7 +737,7 @@
 
     <script>
         // ОБЩАЯ БАНКОВСКАЯ СИСТЕМА
-        const BANK_STORAGE_KEY = 'bank_system_data_v2';
+        const BANK_STORAGE_KEY = 'bank_system_data_v3';
         
         // Улучшения с возможностью многократной покупки
         const UPGRADES = [
@@ -733,7 +792,6 @@
         function getBankData() {
             const data = localStorage.getItem(BANK_STORAGE_KEY);
             if (!data) {
-                // Создаем пустые начальные данные
                 const initialData = {
                     users: [],
                     transactions: []
@@ -792,6 +850,7 @@
 
         // Текущий пользователь
         let currentUser = null;
+        let selectedUser = null;
 
         // DOM элементы
         const authContainer = document.getElementById('authContainer');
@@ -832,11 +891,8 @@
                 return false;
             }
             
-            // Убираем пароль из объекта пользователя
             const { password: _, ...userWithoutPassword } = user;
             currentUser = userWithoutPassword;
-            
-            // Сохраняем ID текущего пользователя
             localStorage.setItem('currentUserId', user.id);
             
             showMainInterface();
@@ -857,13 +913,11 @@
             
             const bankData = getBankData();
             
-            // Проверка, существует ли пользователь
             if (bankData.users.find(u => u.email === email)) {
                 showNotification('Пользователь с таким email уже существует', 'error');
                 return false;
             }
             
-            // Создание нового пользователя
             const newUser = {
                 id: Date.now().toString(),
                 name,
@@ -873,7 +927,7 @@
                 clickCount: 0,
                 incomePerClick: 1,
                 passiveIncome: 0,
-                upgrades: {}, // Теперь объект с уровнями улучшений
+                upgrades: {},
                 lastUpdate: Date.now()
             };
             
@@ -891,25 +945,22 @@
             mainInterface.style.display = 'block';
             
             updateUserData();
-            loadUsersList();
             loadTransactions();
             initUpgrades();
+            updateTotalUsers();
             
-            // Запускаем пассивный доход
             startPassiveIncome();
         }
 
         function updateUserData() {
             if (!currentUser) return;
             
-            // Получаем актуальные данные пользователя
             const updatedUser = getUserFromStorage(currentUser.id);
             if (updatedUser) {
                 const { password: _, ...userWithoutPassword } = updatedUser;
                 currentUser = userWithoutPassword;
             }
             
-            // Обновляем интерфейс
             document.getElementById('userName').textContent = currentUser.name;
             document.getElementById('userEmail').textContent = currentUser.email;
             document.getElementById('balance').textContent = `${currentUser.balance.toLocaleString('ru-RU')} ₽`;
@@ -917,86 +968,101 @@
             document.getElementById('incomePerClick').textContent = `${currentUser.incomePerClick} ₽`;
             document.getElementById('passiveIncome').textContent = `${currentUser.passiveIncome} ₽/сек`;
             
-            // Обновляем улучшения
             initUpgrades();
         }
 
-        function loadUsersList() {
-            const usersList = document.getElementById('usersList');
-            const recipientSelect = document.getElementById('recipient');
-            
+        function updateTotalUsers() {
             const allUsers = getAllUsersFromStorage();
-            const otherUsers = allUsers.filter(user => user.id !== currentUser?.id);
-            
             document.getElementById('totalUsers').textContent = allUsers.length;
-            
-            // Обновляем список пользователей
-            if (otherUsers.length === 0) {
-                usersList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>Пока нет других пользователей</p>
-                        <p style="font-size: 14px; margin-top: 10px;">Пригласите друзей зарегистрироваться!</p>
-                    </div>
-                `;
-            } else {
-                usersList.innerHTML = '';
-                otherUsers.forEach(user => {
-                    const userItem = document.createElement('div');
-                    userItem.className = 'user-item';
-                    userItem.innerHTML = `
-                        <div>
-                            <div class="user-name">${user.name}</div>
-                            <div class="user-email">${user.email}</div>
-                        </div>
-                        <div class="user-balance">${user.balance.toLocaleString('ru-RU')} ₽</div>
-                    `;
-                    usersList.appendChild(userItem);
-                });
-            }
-            
-            // Обновляем выпадающий список
-            recipientSelect.innerHTML = '<option value="" disabled selected>Выберите пользователя</option>';
-            otherUsers.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.id;
-                option.textContent = `${user.name} (${user.balance.toLocaleString('ru-RU')} ₽)`;
-                recipientSelect.appendChild(option);
-            });
         }
 
-        function filterUsers() {
-            const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
-            const usersList = document.getElementById('usersList');
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!searchTerm) {
+                searchResults.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Введите имя или email для поиска</p>
+                    </div>`;
+                return;
+            }
+            
             const allUsers = getAllUsersFromStorage();
-            const otherUsers = allUsers.filter(user => 
+            const filteredUsers = allUsers.filter(user => 
                 user.id !== currentUser?.id && 
                 (user.name.toLowerCase().includes(searchTerm) || 
                  user.email.toLowerCase().includes(searchTerm))
             );
             
-            usersList.innerHTML = '';
-            if (otherUsers.length === 0) {
-                usersList.innerHTML = `
+            if (filteredUsers.length === 0) {
+                searchResults.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-user-times"></i>
                         <p>Пользователи не найдены</p>
-                    </div>
-                `;
-            } else {
-                otherUsers.forEach(user => {
-                    const userItem = document.createElement('div');
-                    userItem.className = 'user-item';
-                    userItem.innerHTML = `
-                        <div>
-                            <div class="user-name">${user.name}</div>
-                            <div class="user-email">${user.email}</div>
-                        </div>
-                        <div class="user-balance">${user.balance.toLocaleString('ru-RU')} ₽</div>
-                    `;
-                    usersList.appendChild(userItem);
-                });
+                        <p style="font-size: 14px; margin-top: 10px;">Попробуйте другой запрос</p>
+                    </div>`;
+                return;
             }
+            
+            searchResults.innerHTML = '';
+            filteredUsers.forEach(user => {
+                const userResult = document.createElement('div');
+                userResult.className = 'user-result';
+                userResult.innerHTML = `
+                    <div class="user-result-info">
+                        <div class="user-result-name">${user.name}</div>
+                        <div class="user-result-email">${user.email}</div>
+                    </div>
+                    <div class="user-result-balance">${user.balance.toLocaleString('ru-RU')} ₽</div>
+                `;
+                
+                userResult.addEventListener('click', () => {
+                    selectUser(user);
+                    document.querySelectorAll('.user-result').forEach(r => r.classList.remove('selected'));
+                    userResult.classList.add('selected');
+                });
+                
+                searchResults.appendChild(userResult);
+            });
+        }
+
+        function selectUser(user) {
+            selectedUser = user;
+            
+            const selectedUserDisplay = document.getElementById('selectedUserDisplay');
+            selectedUserDisplay.style.display = 'block';
+            selectedUserDisplay.innerHTML = `
+                <div class="selected-user-info">
+                    <div>
+                        <div class="selected-user-text">Получатель: ${user.name}</div>
+                        <div style="font-size: 14px; color: #bbdefb;">${user.email}</div>
+                    </div>
+                    <div>
+                        <div style="color: #ffb74d; font-weight: 600;">${user.balance.toLocaleString('ru-RU')} ₽</div>
+                        <button type="button" class="clear-selection" onclick="clearSelection()">
+                            <i class="fas fa-times"></i> Изменить
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('recipientId').value = user.id;
+            document.getElementById('transferBtn').disabled = false;
+            document.getElementById('transferBtn').innerHTML = `<i class="fas fa-paper-plane"></i> Перевести ${user.name}`;
+            
+            // Фокус на поле суммы
+            document.getElementById('amount').focus();
+        }
+
+        function clearSelection() {
+            selectedUser = null;
+            document.getElementById('selectedUserDisplay').style.display = 'none';
+            document.getElementById('recipientId').value = '';
+            document.getElementById('transferBtn').disabled = true;
+            document.getElementById('transferBtn').innerHTML = `<i class="fas fa-paper-plane"></i> Выберите получателя`;
+            document.getElementById('searchInput').focus();
         }
 
         function loadTransactions() {
@@ -1049,7 +1115,6 @@
             
             if (!currentUser) return;
             
-            // Инициализируем upgrades как объект, если это массив
             if (Array.isArray(currentUser.upgrades)) {
                 const upgradesObj = {};
                 currentUser.upgrades.forEach(id => {
@@ -1103,14 +1168,12 @@
                 return;
             }
             
-            // Обновляем баланс и уровень улучшения
             const newBalance = currentUser.balance - currentCost;
             const newLevel = level + 1;
             
             const newUpgrades = { ...currentUser.upgrades };
             newUpgrades[upgradeId] = newLevel;
             
-            // Применяем улучшение
             let updates = {
                 balance: newBalance,
                 upgrades: newUpgrades
@@ -1122,7 +1185,6 @@
                 updates.passiveIncome = currentUser.passiveIncome + upgrade.incomeIncrease;
             }
             
-            // Сохраняем изменения
             const updatedUser = updateUserInStorage(currentUser.id, updates);
             if (updatedUser) {
                 const { password: _, ...userWithoutPassword } = updatedUser;
@@ -1136,7 +1198,6 @@
         function addClick() {
             if (!currentUser) return;
             
-            // Начисляем деньги за клик
             const newBalance = currentUser.balance + currentUser.incomePerClick;
             const newClickCount = currentUser.clickCount + 1;
             
@@ -1150,7 +1211,6 @@
                 currentUser = userWithoutPassword;
                 updateUserData();
                 
-                // Анимация кнопки
                 const clickButton = document.getElementById('clickButton');
                 clickButton.style.transform = 'scale(0.95)';
                 setTimeout(() => {
@@ -1172,7 +1232,6 @@
                 return false;
             }
             
-            // Получаем данные отправителя и получателя
             const sender = getUserFromStorage(currentUser.id);
             const recipient = getUserFromStorage(recipientId);
             
@@ -1186,14 +1245,12 @@
                 return false;
             }
             
-            // Обновляем балансы
             const senderNewBalance = sender.balance - amount;
             const recipientNewBalance = recipient.balance + amount;
             
             updateUserInStorage(sender.id, { balance: senderNewBalance });
             updateUserInStorage(recipient.id, { balance: recipientNewBalance });
             
-            // Создаем транзакцию
             const transaction = {
                 senderId: sender.id,
                 recipientId: recipient.id,
@@ -1205,7 +1262,6 @@
             
             addTransactionToStorage(transaction);
             
-            // Обновляем данные текущего пользователя
             const updatedUser = getUserFromStorage(currentUser.id);
             if (updatedUser) {
                 const { password: _, ...userWithoutPassword } = updatedUser;
@@ -1214,8 +1270,8 @@
             
             showNotification(`Перевод ${amount}₽ для ${recipient.name} выполнен успешно!`, 'success');
             updateUserData();
-            loadUsersList();
             loadTransactions();
+            clearSelection();
             
             return true;
         }
@@ -1232,7 +1288,6 @@
                     currentUser = userWithoutPassword;
                     updateUserData();
                     
-                    // Показываем уведомление о пассивном доходе раз в 30 секунд
                     if (Math.random() > 0.97) {
                         showNotification(`Пассивный доход: +${currentUser.passiveIncome}₽`, 'info');
                     }
@@ -1242,11 +1297,11 @@
 
         function logout() {
             currentUser = null;
+            selectedUser = null;
             localStorage.removeItem('currentUserId');
             mainInterface.style.display = 'none';
             authContainer.style.display = 'flex';
             
-            // Очищаем формы
             loginForm.reset();
             registerForm.reset();
             showAuthForm('login');
@@ -1274,12 +1329,12 @@
         document.getElementById('transferForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const recipientId = document.getElementById('recipient').value;
+            const recipientId = document.getElementById('recipientId').value;
             const amount = parseInt(document.getElementById('amount').value);
             const message = document.getElementById('message').value;
             
             if (!recipientId) {
-                showNotification('Выберите получателя', 'error');
+                showNotification('Сначала выберите получателя', 'error');
                 return;
             }
             
@@ -1289,7 +1344,15 @@
             }
         });
 
-        // Проверяем, есть ли сохраненная сессия
+        // Поиск по нажатию Enter
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchUsers();
+            }
+        });
+
+        // Проверяем сохраненную сессию
         const savedUserId = localStorage.getItem('currentUserId');
         if (savedUserId) {
             const user = getUserFromStorage(savedUserId);
@@ -1300,41 +1363,32 @@
             }
         }
 
-        // Функция для тестирования
-        window.resetBank = function() {
-            if (confirm('Вы уверены? Это удалит всех пользователей и историю операций!')) {
-                localStorage.removeItem(BANK_STORAGE_KEY);
-                localStorage.removeItem('currentUserId');
-                location.reload();
-            }
+        // Функции для тестирования
+        window.addTestUser = function() {
+            const bankData = getBankData();
+            const testUser = {
+                id: 'test_' + Date.now(),
+                name: 'Тестовый Пользователь',
+                email: 'test' + Date.now() + '@test.com',
+                password: '123456',
+                balance: 5000,
+                clickCount: 0,
+                incomePerClick: 1,
+                passiveIncome: 0,
+                upgrades: {},
+                lastUpdate: Date.now()
+            };
+            
+            bankData.users.push(testUser);
+            saveBankData(bankData);
+            updateTotalUsers();
+            showNotification('Тестовый пользователь добавлен', 'info');
         };
 
-        window.addTestUsers = function() {
-            const bankData = getBankData();
-            
-            // Добавляем несколько тестовых пользователей
-            const testUsers = [
-                { id: 'test1', name: 'admin', email: 'admin@test.com', password: 'qwe123qwe123', balance: 500000000000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: {}, lastUpdate: Date.now() },
-                { id: 'test1', name: 'Алексей Смирнов', email: 'alex@test.com', password: '123456', balance: 5000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: {}, lastUpdate: Date.now() },
-                { id: 'test2', name: 'Мария Иванова', email: 'maria@test.com', password: '123456', balance: 3000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: {}, lastUpdate: Date.now() },
-                { id: 'test3', name: 'Дмитрий Петров', email: 'dmitry@test.com', password: '123456', balance: 7000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: {}, lastUpdate: Date.now() }
-            ];
-            
-            // Добавляем только если их нет
-            testUsers.forEach(testUser => {
-                if (!bankData.users.find(u => u.email === testUser.email)) {
-                    bankData.users.push(testUser);
-                }
-            });
-            
-            saveBankData(bankData);
-            
-            if (currentUser) {
-                loadUsersList();
-                showNotification('Добавлены тестовые пользователи', 'info');
-            } else {
-                showNotification('Тестовые пользователи добавлены. Теперь вы можете войти под alex@test.com (пароль: 123456)', 'info');
-            }
+        window.showAllUsers = function() {
+            const users = getAllUsersFromStorage();
+            console.log('Все пользователи:', users);
+            showNotification(`Всего пользователей: ${users.length}`, 'info');
         };
     </script>
 </body>
