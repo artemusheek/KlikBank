@@ -1,4 +1,4 @@
-а<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -1164,197 +1164,152 @@
         const adminBadge = document.getElementById('adminBadge');
         const adminPanel = document.getElementById('adminPanel');
 
-       // ========================
-// АДМИН ФУНКЦИИ (обновленные)
-// ========================
+        // ========================
+        // АДМИН ФУНКЦИИ
+        // ========================
 
-// Функция admin() - дает права оператора
-window.admin = function() {
-    isAdmin = true;
-    updateAdminUI();
-    showNotification('👑 Активирован режим администратора!', 'success');
-    console.log('%c=== РЕЖИМ АДМИНИСТРАТОРА АКТИВИРОВАН ===', 'color: #ff9800; font-size: 16px; font-weight: bold;');
-    console.log('%cДоступные команды:', 'color: #2196f3; font-weight: bold;');
-    console.log('%csetMoney(сумма) - установить точную сумму денег', 'color: #4caf50;');
-    console.log('%caddMoney(сумма) - добавить сумму денег', 'color: #4caf50;');
-    console.log('%cclearMoney() - очистить деньги', 'color: #4caf50;');
-    console.log('%cresetAll() - полный сброс', 'color: #4caf50;');
-    console.log('%cgiveMoneyById(id, сумма) - выдать деньги по ID', 'color: #4caf50;');
-    console.log('%cgiveMoneyByName(имя, сумма) - выдать деньги по имени', 'color: #4caf50;');
-    console.log('%cresetUserById(id) - сбросить пользователя по ID', 'color: #4caf50;');
-    console.log('%cresetUserByName(имя) - сбросить пользователя по имени', 'color: #4caf50;');
-    console.log('%cviewAllUsers() - посмотреть всех пользователей с ID', 'color: #4caf50;');
-    console.log('%cmaxUpgrades() - макс. улучшения', 'color: #4caf50;');
-    console.log('=========================================');
-};
+        // Функция admin() - дает права оператора
+        window.admin = function() {
+            isAdmin = true;
+            updateAdminUI();
+            showNotification('👑 Активирован режим администратора!', 'success');
+            console.log('%c=== РЕЖИМ АДМИНИСТРАТОРА АКТИВИРОВАН ===', 'color: #ff9800; font-size: 16px; font-weight: bold;');
+            console.log('%cДоступные команды:', 'color: #2196f3; font-weight: bold;');
+            console.log('%csetMoney(сумма) - установить точную сумму денег', 'color: #4caf50;');
+            console.log('%caddMoney(сумма) - добавить сумму денег', 'color: #4caf50;');
+            console.log('%cclearMoney() - очистить деньги', 'color: #4caf50;');
+            console.log('%cresetAll() - полный сброс', 'color: #4caf50;');
+            console.log('%cgiveMoney(пользователь, сумма) - выдать деньги другому', 'color: #4caf50;');
+            console.log('%cresetUser(пользователь) - сбросить пользователя', 'color: #4caf50;');
+            console.log('%cviewAllUsers() - посмотреть всех пользователей', 'color: #4caf50;');
+            console.log('%cmaxUpgrades() - макс. улучшения', 'color: #4caf50;');
+            console.log('=========================================');
+        };
 
-// Функция giveMoneyById() - выдать деньги по ID пользователя
-window.giveMoneyById = function(userId, amount) {
-    if (!currentUser || !isAdmin) {
-        showNotification('Требуются права администратора!', 'error');
-        return;
-    }
-    
-    const bankData = getBankData();
-    const targetUser = bankData.users.find(u => u.id === userId);
-    
-    if (!targetUser) {
-        showNotification(`Пользователь с ID "${userId}" не найден`, 'error');
-        return;
-    }
-    
-    if (targetUser.id === currentUser.id) {
-        showNotification('Нельзя выдать деньги самому себе', 'error');
-        return;
-    }
-    
-    const oldBalance = targetUser.balance;
-    const newBalance = oldBalance + amount;
-    
-    updateUserInStorage(targetUser.id, {
-        balance: newBalance
-    });
-    
-    console.log(`💰 Выдано ${amount}₽ пользователю ${targetUser.name} (ID: ${userId})`);
-    console.log(`   Было: ${oldBalance}₽ | Стало: ${newBalance}₽`);
-    
-    showNotification(`✅ Пользователю ${targetUser.name} выдано ${amount.toLocaleString('ru-RU')}₽`, 'success');
-    return targetUser.name; // Возвращаем имя для информации
-};
+        // Функция setMoney() - устанавливает точную сумму денег
+        window.setMoney = function(amount) {
+            if (!currentUser) {
+                showNotification('Сначала войдите в систему!', 'error');
+                return;
+            }
+            
+            if (typeof amount !== 'number' || amount < 0) {
+                showNotification('Введите корректную сумму (положительное число)', 'error');
+                return;
+            }
+            
+            const updatedUser = updateUserInStorage(currentUser.id, {
+                balance: amount
+            });
+            
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+                updateUserData();
+                showNotification(`✅ Баланс установлен: ${amount.toLocaleString('ru-RU')}₽`, 'success');
+            }
+        };
 
-// Функция giveMoneyByName() - выдать деньги по имени пользователя
-window.giveMoneyByName = function(userName, amount) {
-    if (!currentUser || !isAdmin) {
-        showNotification('Требуются права администратора!', 'error');
-        return;
-    }
-    
-    const bankData = getBankData();
-    const targetUser = bankData.users.find(u => u.name === userName);
-    
-    if (!targetUser) {
-        showNotification(`Пользователь "${userName}" не найден`, 'error');
-        return;
-    }
-    
-    if (targetUser.id === currentUser.id) {
-        showNotification('Нельзя выдать деньги самому себе', 'error');
-        return;
-    }
-    
-    const oldBalance = targetUser.balance;
-    const newBalance = oldBalance + amount;
-    
-    updateUserInStorage(targetUser.id, {
-        balance: newBalance
-    });
-    
-    console.log(`💰 Выдано ${amount}₽ пользователю ${userName} (ID: ${targetUser.id})`);
-    console.log(`   Было: ${oldBalance}₽ | Стало: ${newBalance}₽`);
-    
-    showNotification(`✅ Пользователю ${userName} выдано ${amount.toLocaleString('ru-RU')}₽`, 'success');
-    return targetUser.id; // Возвращаем ID для информации
-};
+        // Функция giveMoney() - выдать деньги другому пользователю
+        window.giveMoney = function(userName, amount) {
+            if (!currentUser || !isAdmin) {
+                showNotification('Требуются права администратора!', 'error');
+                return;
+            }
+            
+            const bankData = getBankData();
+            const targetUser = bankData.users.find(u => u.name === userName);
+            
+            if (!targetUser) {
+                showNotification(`Пользователь "${userName}" не найден`, 'error');
+                return;
+            }
+            
+            if (targetUser.id === currentUser.id) {
+                showNotification('Нельзя выдать деньги самому себе', 'error');
+                return;
+            }
+            
+            updateUserInStorage(targetUser.id, {
+                balance: targetUser.balance + amount
+            });
+            
+            showNotification(`✅ Пользователю ${userName} выдано ${amount.toLocaleString('ru-RU')}₽`, 'success');
+        };
 
-// Старая функция для обратной совместимости
-window.giveMoney = function(userName, amount) {
-    console.warn('⚠ giveMoney() устарела! Используйте giveMoneyById() или giveMoneyByName()');
-    return giveMoneyByName(userName, amount);
-};
+        // Функция resetUser() - сбросить пользователя
+        window.resetUser = function(userName) {
+            if (!currentUser || !isAdmin) {
+                showNotification('Требуются права администратора!', 'error');
+                return;
+            }
+            
+            const bankData = getBankData();
+            const targetUser = bankData.users.find(u => u.name === userName);
+            
+            if (!targetUser) {
+                showNotification(`Пользователь "${userName}" не найден`, 'error');
+                return;
+            }
+            
+            if (confirm(`Сбросить пользователя "${userName}"? Баланс и улучшения будут обнулены.`)) {
+                updateUserInStorage(targetUser.id, {
+                    balance: 1000,
+                    clickCount: 0,
+                    incomePerClick: 1,
+                    passiveIncome: 0,
+                    upgrades: {}
+                });
+                
+                showNotification(`✅ Пользователь "${userName}" сброшен`, 'success');
+            }
+        };
 
-// Функция resetUserById() - сбросить пользователя по ID
-window.resetUserById = function(userId) {
-    if (!currentUser || !isAdmin) {
-        showNotification('Требуются права администратора!', 'error');
-        return;
-    }
-    
-    const bankData = getBankData();
-    const targetUser = bankData.users.find(u => u.id === userId);
-    
-    if (!targetUser) {
-        showNotification(`Пользователь с ID "${userId}" не найден`, 'error');
-        return;
-    }
-    
-    if (confirm(`Сбросить пользователя "${targetUser.name}" (ID: ${userId})?\nБаланс и улучшения будут обнулены.`)) {
-        updateUserInStorage(targetUser.id, {
-            balance: 1000,
-            clickCount: 0,
-            incomePerClick: 1,
-            passiveIncome: 0,
-            upgrades: {}
-        });
-        
-        console.log(`🔄 Сброшен пользователь ${targetUser.name} (ID: ${userId})`);
-        showNotification(`✅ Пользователь "${targetUser.name}" сброшен`, 'success');
-        return targetUser.name;
-    }
-};
+        // Функция viewAllUsers() - посмотреть всех пользователей
+        window.viewAllUsers = function() {
+            if (!currentUser || !isAdmin) {
+                showNotification('Требуются права администратора!', 'error');
+                return;
+            }
+            
+            const users = getAllUsersFromStorage();
+            console.log('%c=== ВСЕ ПОЛЬЗОВАТЕЛИ ===', 'color: #2196f3; font-size: 16px; font-weight: bold;');
+            users.forEach((user, index) => {
+                console.log(`%c${index + 1}. ${user.name}`, 'color: #4fc3f7; font-weight: bold;');
+                console.log(`   ID: ${user.id}`);
+                console.log(`   Баланс: ${user.balance.toLocaleString('ru-RU')}₽`);
+                console.log(`   Кликов: ${user.clickCount}`);
+                console.log(`   Доход за клик: ${user.incomePerClick}₽`);
+                console.log(`   Пассивный доход: ${user.passiveIncome}₽/сек`);
+                console.log(`   Улучшения: ${JSON.stringify(user.upgrades)}`);
+                console.log('---');
+            });
+            
+            showNotification(`Показано ${users.length} пользователей в консоли`, 'info');
+        };
 
-// Функция resetUserByName() - сбросить пользователя по имени
-window.resetUserByName = function(userName) {
-    if (!currentUser || !isAdmin) {
-        showNotification('Требуются права администратора!', 'error');
-        return;
-    }
-    
-    const bankData = getBankData();
-    const targetUser = bankData.users.find(u => u.name === userName);
-    
-    if (!targetUser) {
-        showNotification(`Пользователь "${userName}" не найден`, 'error');
-        return;
-    }
-    
-    if (confirm(`Сбросить пользователя "${userName}" (ID: ${targetUser.id})?\nБаланс и улучшения будут обнулены.`)) {
-        updateUserInStorage(targetUser.id, {
-            balance: 1000,
-            clickCount: 0,
-            incomePerClick: 1,
-            passiveIncome: 0,
-            upgrades: {}
-        });
-        
-        console.log(`🔄 Сброшен пользователь ${userName} (ID: ${targetUser.id})`);
-        showNotification(`✅ Пользователь "${userName}" сброшен`, 'success');
-        return targetUser.id;
-    }
-};
+        // Обновление UI админ-режима
+        function updateAdminUI() {
+            if (isAdmin) {
+                adminBadge.style.display = 'inline-block';
+                adminPanel.style.display = 'block';
+            } else {
+                adminBadge.style.display = 'none';
+                adminPanel.style.display = 'none';
+            }
+        }
 
-// Обновленная функция viewAllUsers() - показывает ID
-window.viewAllUsers = function() {
-    if (!currentUser || !isAdmin) {
-        showNotification('Требуются права администратора!', 'error');
-        return;
-    }
-    
-    const users = getAllUsersFromStorage();
-    console.log('%c=== ВСЕ ПОЛЬЗОВАТЕЛИ ===', 'color: #2196f3; font-size: 16px; font-weight: bold;');
-    console.log('%c📋 Для выдачи денег используйте:', 'color: #ff9800;');
-    console.log('%cgiveMoneyById("ID", сумма) - по ID', 'color: #4caf50;');
-    console.log('%cgiveMoneyByName("Имя", сумма) - по имени', 'color: #4caf50;');
-    console.log('------------------------------');
-    
-    users.forEach((user, index) => {
-        console.log(`%c${index + 1}. ${user.name}`, 'color: #4fc3f7; font-weight: bold;');
-        console.log(`   🆔 ID: ${user.id}`);
-        console.log(`   💰 Баланс: ${user.balance.toLocaleString('ru-RU')}₽`);
-        console.log(`   👆 Кликов: ${user.clickCount}`);
-        console.log(`   ⚡ Доход за клик: ${user.incomePerClick}₽`);
-        console.log(`   🕒 Пассивный доход: ${user.passiveIncome}₽/сек`);
-        console.log(`   🏆 Улучшения: ${Object.keys(user.upgrades || {}).length} шт.`);
-        console.log(`   📅 Зарегистрирован: ${new Date(user.registeredAt).toLocaleString('ru-RU')}`);
-        console.log('---');
-    });
-    
-    console.log('%c💡 Примеры команд:', 'color: #9c27b0;');
-    console.log('%cgiveMoneyById("' + (users[0]?.id || 'user_123') + '", 5000)', 'color: #4caf50;');
-    console.log('%cgiveMoneyByName("' + (users[0]?.name || 'Имя') + '", 10000)', 'color: #4caf50;');
-    
-    showNotification(`Показано ${users.length} пользователей в консоли`, 'info');
-    return users; // Возвращаем список пользователей
-};
+        // Переключение админ-режима
+        function toggleAdminMode() {
+            if (isAdmin) {
+                isAdmin = false;
+                updateAdminUI();
+                showNotification('👑 Режим администратора отключен', 'warning');
+            } else {
+                admin();
+            }
+        }
+
         // ========================
         // ОСНОВНЫЕ ФУНКЦИИ
         // ========================
@@ -2088,8 +2043,6 @@ window.viewAllUsers = function() {
     </script>
 </body>
 </html>
-
-
 
 
 
