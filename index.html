@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Банк "ФинансПро"</title>
+    <title>Банк "ФинансПро" - Онлайн банкинг</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -23,6 +23,135 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e3a8a;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal h2 {
+            margin-bottom: 25px;
+            color: #4fc3f7;
+            text-align: center;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #bbb;
+        }
+
+        /* Аутентификация */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .auth-tab.active {
+            color: #4fc3f7;
+            border-bottom: 2px solid #4fc3f7;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #bbdefb;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #4fc3f7, #2979ff);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(41, 121, 255, 0.3);
+        }
+
+        /* Основной интерфейс */
+        .main-interface {
+            display: none;
         }
 
         header {
@@ -48,6 +177,35 @@
         .logo h1 {
             font-size: 28px;
             font-weight: 700;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info .name {
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .balance-card {
@@ -128,10 +286,6 @@
             box-shadow: 0 15px 25px rgba(41, 121, 255, 0.4);
         }
 
-        #clickButton:active {
-            transform: scale(0.95);
-        }
-
         .clicker-info {
             display: flex;
             justify-content: space-around;
@@ -178,10 +332,6 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 16px;
-        }
-
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
         }
 
         button {
@@ -234,16 +384,10 @@
             border-left-color: #4caf50;
         }
 
-        .transaction-amount {
-            font-weight: 600;
-        }
-
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #4caf50;
-            color: white;
             padding: 15px 25px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -252,16 +396,18 @@
             z-index: 1000;
         }
 
-        .notification.show {
-            transform: translateX(0);
+        .notification.success {
+            background: #4caf50;
+            color: white;
         }
 
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 30px;
-            color: #bbdefb;
+        .notification.error {
+            background: #f44336;
+            color: white;
+        }
+
+        .notification.show {
+            transform: translateX(0);
         }
 
         .upgrades {
@@ -280,7 +426,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .upgrade-item:hover {
+        .upgrade-item:hover:not(.disabled) {
             background: rgba(255, 255, 255, 0.12);
             transform: translateY(-5px);
         }
@@ -304,304 +450,696 @@
             color: #4caf50;
             margin-top: 5px;
         }
+
+        .users-list {
+            margin-top: 20px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .user-balance {
+            color: #ffb74d;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            color: #bbdefb;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-university"></i>
-                <h1>Банк "ФинансПро"</h1>
+    <!-- Аутентификация -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="showAuthForm('login')">Вход</div>
+                <div class="auth-tab" onclick="showAuthForm('register')">Регистрация</div>
             </div>
-            <div class="user-info">
-                <p><i class="fas fa-user"></i> Клиент: Иван Иванов</p>
-            </div>
-        </header>
-
-        <div class="balance-card">
-            <h2>Ваш баланс</h2>
-            <div class="balance-amount" id="balance">1 000 ₽</div>
-        </div>
-
-        <div class="main-content">
-            <div class="panel">
-                <h3><i class="fas fa-mouse-pointer"></i> Заработок кликами</h3>
-                <div class="clicker-area">
-                    <p>Кликайте на кнопку, чтобы зарабатывать деньги</p>
-                    <button id="clickButton">
-                        <i class="fas fa-coins"></i><br>
-                        Кликнуть!
-                    </button>
-                    <div class="clicker-info">
-                        <div class="click-stat">
-                            <h4>Кликов</h4>
-                            <p id="clickCount">0</p>
-                        </div>
-                        <div class="click-stat">
-                            <h4>Доход за клик</h4>
-                            <p id="incomePerClick">1 ₽</p>
-                        </div>
-                        <div class="click-stat">
-                            <h4>Пассивный доход</h4>
-                            <p id="passiveIncome">0 ₽/сек</p>
-                        </div>
-                    </div>
+            
+            <form class="auth-form active" id="loginForm">
+                <div class="input-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
                 </div>
                 
-                <h3 style="margin-top: 30px;"><i class="fas fa-chart-line"></i> Улучшения</h3>
-                <div class="upgrades" id="upgradesContainer">
-                    <!-- Улучшения будут добавлены через JavaScript -->
+                <div class="input-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" required>
                 </div>
-            </div>
-
-            <div class="panel">
-                <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
-                <form class="transfer-form" id="transferForm">
-                    <div class="form-group">
-                        <label for="recipient">Получатель</label>
-                        <select id="recipient" required>
-                            <option value="" disabled selected>Выберите получателя</option>
-                            <option value="user2">Анна Петрова</option>
-                            <option value="user3">Сергей Смирнов</option>
-                            <option value="user4">Ольга Козлова</option>
-                            <option value="user5">Дмитрий Волков</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="amount">Сумма перевода (₽)</label>
-                        <input type="number" id="amount" min="1" required placeholder="Введите сумму">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message">Сообщение получателю (необязательно)</label>
-                        <input type="text" id="message" placeholder="Например: За обед">
-                    </div>
-                    
-                    <button type="submit">
-                        <i class="fas fa-paper-plane"></i> Отправить перевод
-                    </button>
-                </form>
-
-                <div class="transactions">
-                    <h3><i class="fas fa-history"></i> История операций</h3>
-                    <ul id="transactionsList">
-                        <!-- Транзакции будут добавляться здесь -->
-                    </ul>
+                
+                <button type="submit" class="auth-btn">Войти</button>
+            </form>
+            
+            <form class="auth-form" id="registerForm">
+                <div class="input-group">
+                    <label for="registerName">Имя и фамилия</label>
+                    <input type="text" id="registerName" required>
                 </div>
-            </div>
+                
+                <div class="input-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="registerPassword">Пароль</label>
+                    <input type="password" id="registerPassword" minlength="6" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="registerConfirmPassword">Подтвердите пароль</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                
+                <button type="submit" class="auth-btn">Зарегистрироваться</button>
+            </form>
         </div>
-
-        <footer>
-            <p>Банк "ФинансПро" © 2023. Все права защищены.</p>
-            <p>Круглосуточная поддержка: 8-800-123-45-67</p>
-        </footer>
     </div>
 
-    <div class="notification" id="notification">
-        Перевод выполнен успешно!
+    <!-- Основной интерфейс -->
+    <div class="main-interface" id="mainInterface">
+        <div class="container">
+            <header>
+                <div class="logo">
+                    <i class="fas fa-university"></i>
+                    <h1>Банк "ФинансПро"</h1>
+                </div>
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="name" id="userName">Иван Иванов</div>
+                        <div class="email" id="userEmail">user@example.com</div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <h2>Ваш баланс</h2>
+                <div class="balance-amount" id="balance">1 000 ₽</div>
+            </div>
+
+            <div class="main-content">
+                <div class="panel">
+                    <h3><i class="fas fa-mouse-pointer"></i> Заработок кликами</h3>
+                    <div class="clicker-area">
+                        <p>Кликайте на кнопку, чтобы зарабатывать деньги</p>
+                        <button id="clickButton">
+                            <i class="fas fa-coins"></i><br>
+                            Кликнуть!
+                        </button>
+                        <div class="clicker-info">
+                            <div class="click-stat">
+                                <h4>Кликов</h4>
+                                <p id="clickCount">0</p>
+                            </div>
+                            <div class="click-stat">
+                                <h4>Доход за клик</h4>
+                                <p id="incomePerClick">1 ₽</p>
+                            </div>
+                            <div class="click-stat">
+                                <h4>Пассивный доход</h4>
+                                <p id="passiveIncome">0 ₽/сек</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 30px;"><i class="fas fa-chart-line"></i> Улучшения</h3>
+                    <div class="upgrades" id="upgradesContainer">
+                        <!-- Улучшения будут добавлены через JavaScript -->
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
+                    
+                    <div class="users-list">
+                        <h4>Другие пользователи:</h4>
+                        <div id="usersList">
+                            <!-- Список пользователей будет загружен здесь -->
+                        </div>
+                    </div>
+                    
+                    <form class="transfer-form" id="transferForm">
+                        <div class="form-group">
+                            <label for="recipient">Выберите получателя</label>
+                            <select id="recipient" required>
+                                <option value="" disabled selected>Выберите пользователя</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="amount">Сумма перевода (₽)</label>
+                            <input type="number" id="amount" min="1" required placeholder="Введите сумму">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Сообщение получателю</label>
+                            <input type="text" id="message" placeholder="Например: За обед">
+                        </div>
+                        
+                        <button type="submit">
+                            <i class="fas fa-paper-plane"></i> Отправить перевод
+                        </button>
+                    </form>
+
+                    <div class="transactions">
+                        <h3><i class="fas fa-history"></i> История операций</h3>
+                        <ul id="transactionsList">
+                            <!-- Транзакции будут добавляться здесь -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <p>Банк "ФинансПро" © 2023. Все права защищены.</p>
+                <p>Круглосуточная поддержка: 8-800-123-45-67</p>
+                <p>Всего пользователей: <span id="totalUsers">1</span></p>
+            </footer>
+        </div>
     </div>
+
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
 
     <script>
-        // Инициализация переменных
-        let balance = 1000;
-        let clickCount = 0;
-        let incomePerClick = 1;
-        let passiveIncome = 0;
-        let upgrades = [
-            { id: 1, name: "Улучшенная мышь", cost: 100, incomeIncrease: 1, type: "click", purchased: false },
-            { id: 2, name: "Процессор для майнинга", cost: 500, incomeIncrease: 5, type: "click", purchased: false },
-            { id: 3, name: "Банковский вклад", cost: 1000, incomeIncrease: 2, type: "passive", purchased: false },
-            { id: 4, name: "Инвестиционный фонд", cost: 5000, incomeIncrease: 10, type: "passive", purchased: false },
-            { id: 5, name: "Криптоферма", cost: 15000, incomeIncrease: 50, type: "passive", purchased: false }
-        ];
-
-        // Элементы DOM
-        const balanceElement = document.getElementById('balance');
-        const clickCountElement = document.getElementById('clickCount');
-        const incomePerClickElement = document.getElementById('incomePerClick');
-        const passiveIncomeElement = document.getElementById('passiveIncome');
-        const clickButton = document.getElementById('clickButton');
-        const transferForm = document.getElementById('transferForm');
-        const transactionsList = document.getElementById('transactionsList');
-        const notification = document.getElementById('notification');
-        const upgradesContainer = document.getElementById('upgradesContainer');
-
-        // Инициализация улучшений
-        function initUpgrades() {
-            upgradesContainer.innerHTML = '';
-            upgrades.forEach(upgrade => {
-                const upgradeElement = document.createElement('div');
-                upgradeElement.className = `upgrade-item ${upgrade.purchased ? 'disabled' : balance < upgrade.cost ? 'disabled' : ''}`;
-                upgradeElement.innerHTML = `
-                    <div class="upgrade-name">${upgrade.name}</div>
-                    <div class="upgrade-cost">Стоимость: ${upgrade.cost} ₽</div>
-                    <div class="upgrade-income">+${upgrade.incomeIncrease} ${upgrade.type === 'click' ? '₽/клик' : '₽/сек'}</div>
-                `;
+        // БАНКОВСКАЯ СИСТЕМА
+        class BankSystem {
+            constructor() {
+                this.users = JSON.parse(localStorage.getItem('bankUsers')) || [];
+                this.transactions = JSON.parse(localStorage.getItem('bankTransactions')) || [];
+                this.currentUser = null;
                 
-                if (!upgrade.purchased && balance >= upgrade.cost) {
-                    upgradeElement.addEventListener('click', () => purchaseUpgrade(upgrade.id));
+                // Инициализация тестового пользователя, если нет пользователей
+                if (this.users.length === 0) {
+                    this.createTestUsers();
                 }
-                
-                upgradesContainer.appendChild(upgradeElement);
-            });
-        }
-
-        // Покупка улучшения
-        function purchaseUpgrade(upgradeId) {
-            const upgrade = upgrades.find(u => u.id === upgradeId);
-            
-            if (!upgrade || upgrade.purchased || balance < upgrade.cost) return;
-            
-            balance -= upgrade.cost;
-            upgrade.purchased = true;
-            
-            if (upgrade.type === 'click') {
-                incomePerClick += upgrade.incomeIncrease;
-                incomePerClickElement.textContent = `${incomePerClick} ₽`;
-                showNotification(`Куплено улучшение: ${upgrade.name}! Теперь вы получаете +${upgrade.incomeIncrease}₽ за клик`);
-            } else {
-                passiveIncome += upgrade.incomeIncrease;
-                passiveIncomeElement.textContent = `${passiveIncome} ₽/сек`;
-                showNotification(`Куплено улучшение: ${upgrade.name}! Теперь ваш пассивный доход: +${upgrade.incomeIncrease}₽/сек`);
             }
             
-            updateBalance();
-            initUpgrades();
+            createTestUsers() {
+                const testUsers = [
+                    { id: '1', name: 'Иван Иванов', email: 'ivan@test.com', password: '123456', balance: 5000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: [] },
+                    { id: '2', name: 'Анна Петрова', email: 'anna@test.com', password: '123456', balance: 3000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: [] },
+                    { id: '3', name: 'Сергей Смирнов', email: 'sergey@test.com', password: '123456', balance: 7000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: [] }
+                ];
+                
+                this.users = testUsers;
+                this.saveUsers();
+            }
+            
+            saveUsers() {
+                localStorage.setItem('bankUsers', JSON.stringify(this.users));
+            }
+            
+            saveTransactions() {
+                localStorage.setItem('bankTransactions', JSON.stringify(this.transactions));
+            }
+            
+            register(name, email, password) {
+                // Проверка, существует ли пользователь
+                if (this.users.find(u => u.email === email)) {
+                    return { success: false, message: 'Пользователь с таким email уже существует' };
+                }
+                
+                // Создание нового пользователя
+                const newUser = {
+                    id: Date.now().toString(),
+                    name,
+                    email,
+                    password,
+                    balance: 1000,
+                    clickCount: 0,
+                    incomePerClick: 1,
+                    passiveIncome: 0,
+                    upgrades: []
+                };
+                
+                this.users.push(newUser);
+                this.saveUsers();
+                
+                return { success: true, user: newUser };
+            }
+            
+            login(email, password) {
+                const user = this.users.find(u => u.email === email && u.password === password);
+                
+                if (!user) {
+                    return { success: false, message: 'Неверный email или пароль' };
+                }
+                
+                // Не храним пароль в текущем пользователе
+                const { password: _, ...userWithoutPassword } = user;
+                this.currentUser = userWithoutPassword;
+                
+                return { success: true, user: userWithoutPassword };
+            }
+            
+            logout() {
+                this.currentUser = null;
+            }
+            
+            getAllUsersExceptCurrent() {
+                if (!this.currentUser) return [];
+                return this.users.filter(user => user.id !== this.currentUser.id);
+            }
+            
+            getUserById(userId) {
+                return this.users.find(user => user.id === userId);
+            }
+            
+            updateUser(userId, updates) {
+                const userIndex = this.users.findIndex(u => u.id === userId);
+                if (userIndex !== -1) {
+                    this.users[userIndex] = { ...this.users[userIndex], ...updates };
+                    this.saveUsers();
+                    
+                    // Обновляем текущего пользователя, если это он
+                    if (this.currentUser && this.currentUser.id === userId) {
+                        this.currentUser = { ...this.currentUser, ...updates };
+                    }
+                }
+            }
+            
+            transferMoney(senderId, recipientId, amount, message = '') {
+                const sender = this.getUserById(senderId);
+                const recipient = this.getUserById(recipientId);
+                
+                if (!sender || !recipient) {
+                    return { success: false, message: 'Пользователь не найден' };
+                }
+                
+                if (sender.balance < amount) {
+                    return { success: false, message: 'Недостаточно средств' };
+                }
+                
+                // Выполняем перевод
+                this.updateUser(senderId, { balance: sender.balance - amount });
+                this.updateUser(recipientId, { balance: recipient.balance + amount });
+                
+                // Создаем транзакцию
+                const transaction = {
+                    id: Date.now().toString(),
+                    senderId,
+                    recipientId,
+                    senderName: sender.name,
+                    recipientName: recipient.name,
+                    amount,
+                    message,
+                    timestamp: new Date().toISOString()
+                };
+                
+                this.transactions.push(transaction);
+                this.saveTransactions();
+                
+                return { 
+                    success: true, 
+                    transaction,
+                    senderBalance: sender.balance - amount,
+                    recipientBalance: recipient.balance + amount
+                };
+            }
+            
+            getUserTransactions(userId) {
+                return this.transactions
+                    .filter(t => t.senderId === userId || t.recipientId === userId)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+            
+            addClick(userId) {
+                const user = this.getUserById(userId);
+                if (!user) return;
+                
+                const newBalance = user.balance + user.incomePerClick;
+                const newClickCount = user.clickCount + 1;
+                
+                this.updateUser(userId, {
+                    balance: newBalance,
+                    clickCount: newClickCount
+                });
+                
+                return { newBalance, newClickCount };
+            }
+            
+            buyUpgrade(userId, upgrade) {
+                const user = this.getUserById(userId);
+                if (!user || user.balance < upgrade.cost || user.upgrades.includes(upgrade.id)) {
+                    return { success: false };
+                }
+                
+                user.balance -= upgrade.cost;
+                user.upgrades.push(upgrade.id);
+                
+                if (upgrade.type === 'click') {
+                    user.incomePerClick += upgrade.incomeIncrease;
+                } else {
+                    user.passiveIncome += upgrade.incomeIncrease;
+                }
+                
+                this.updateUser(userId, {
+                    balance: user.balance,
+                    upgrades: user.upgrades,
+                    incomePerClick: user.incomePerClick,
+                    passiveIncome: user.passiveIncome
+                });
+                
+                return { success: true, user };
+            }
         }
 
-        // Обновление баланса
-        function updateBalance() {
-            balanceElement.textContent = `${balance.toLocaleString('ru-RU')} ₽`;
+        // ИНИЦИАЛИЗАЦИЯ
+        const bank = new BankSystem();
+        const upgrades = [
+            { id: 1, name: "Улучшенная мышь", cost: 100, incomeIncrease: 1, type: "click" },
+            { id: 2, name: "Процессор для майнинга", cost: 500, incomeIncrease: 5, type: "click" },
+            { id: 3, name: "Банковский вклад", cost: 1000, incomeIncrease: 2, type: "passive" },
+            { id: 4, name: "Инвестиционный фонд", cost: 5000, incomeIncrease: 10, type: "passive" },
+            { id: 5, name: "Криптоферма", cost: 15000, incomeIncrease: 50, type: "passive" }
+        ];
+
+        // DOM элементы
+        const authContainer = document.getElementById('authContainer');
+        const mainInterface = document.getElementById('mainInterface');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const notification = document.getElementById('notification');
+
+        // Функции аутентификации
+        function showAuthForm(formType) {
+            document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+            
+            if (formType === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                loginForm.classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                registerForm.classList.add('active');
+            }
         }
 
-        // Показ уведомления
-        function showNotification(message) {
+        function showNotification(message, type = 'success') {
             notification.textContent = message;
-            notification.classList.add('show');
+            notification.className = `notification ${type} show`;
             
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
 
-        // Добавление транзакции
-        function addTransaction(recipientName, amount, type, message = '') {
-            const transactionItem = document.createElement('li');
-            transactionItem.className = `transaction-item ${type}`;
+        function loginUser(email, password) {
+            const result = bank.login(email, password);
             
-            const date = new Date().toLocaleTimeString('ru-RU', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            const transactionText = type === 'debit' 
-                ? `Перевод ${recipientName}: -${amount}₽ ${message ? `(${message})` : ''}`
-                : `Пополнение: +${amount}₽`;
-            
-            transactionItem.innerHTML = `
-                <div class="transaction-details">
-                    <div class="transaction-text">${transactionText}</div>
-                    <div class="transaction-time">${date}</div>
-                </div>
-                <div class="transaction-amount ${type}">
-                    ${type === 'debit' ? '-' : '+'}${amount} ₽
-                </div>
-            `;
-            
-            transactionsList.prepend(transactionItem);
+            if (result.success) {
+                showMainInterface(result.user);
+            } else {
+                showNotification(result.message, 'error');
+            }
         }
 
-        // Обработчик клика
-        clickButton.addEventListener('click', () => {
-            clickCount++;
-            balance += incomePerClick;
+        function registerUser(name, email, password, confirmPassword) {
+            if (password !== confirmPassword) {
+                showNotification('Пароли не совпадают', 'error');
+                return;
+            }
             
-            clickCountElement.textContent = clickCount.toLocaleString('ru-RU');
+            if (password.length < 6) {
+                showNotification('Пароль должен содержать минимум 6 символов', 'error');
+                return;
+            }
+            
+            const result = bank.register(name, email, password);
+            
+            if (result.success) {
+                showNotification('Регистрация успешна! Теперь вы можете войти.', 'success');
+                showAuthForm('login');
+                document.getElementById('loginEmail').value = email;
+            } else {
+                showNotification(result.message, 'error');
+            }
+        }
+
+        function showMainInterface(user) {
+            authContainer.style.display = 'none';
+            mainInterface.style.display = 'block';
+            
+            updateUserInfo(user);
             updateBalance();
+            loadUsersList();
+            loadTransactions();
+            initUpgrades();
             
-            // Анимация кнопки
-            clickButton.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                clickButton.style.transform = 'scale(1)';
-            }, 100);
+            // Запускаем пассивный доход
+            startPassiveIncome();
+        }
+
+        function updateUserInfo(user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        function updateBalance() {
+            if (!bank.currentUser) return;
+            document.getElementById('balance').textContent = `${bank.currentUser.balance.toLocaleString('ru-RU')} ₽`;
+            document.getElementById('clickCount').textContent = bank.currentUser.clickCount.toLocaleString('ru-RU');
+            document.getElementById('incomePerClick').textContent = `${bank.currentUser.incomePerClick} ₽`;
+            document.getElementById('passiveIncome').textContent = `${bank.currentUser.passiveIncome} ₽/сек`;
+        }
+
+        function loadUsersList() {
+            const usersList = document.getElementById('usersList');
+            const recipientSelect = document.getElementById('recipient');
+            
+            usersList.innerHTML = '';
+            recipientSelect.innerHTML = '<option value="" disabled selected>Выберите пользователя</option>';
+            
+            const otherUsers = bank.getAllUsersExceptCurrent();
+            document.getElementById('totalUsers').textContent = bank.users.length;
+            
+            otherUsers.forEach(user => {
+                // Добавляем в список пользователей
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div>
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-email">${user.email}</div>
+                    </div>
+                    <div class="user-balance">${user.balance.toLocaleString('ru-RU')} ₽</div>
+                `;
+                usersList.appendChild(userItem);
+                
+                // Добавляем в выпадающий список
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${user.balance.toLocaleString('ru-RU')} ₽)`;
+                recipientSelect.appendChild(option);
+            });
+        }
+
+        function loadTransactions() {
+            const transactionsList = document.getElementById('transactionsList');
+            transactionsList.innerHTML = '';
+            
+            if (!bank.currentUser) return;
+            
+            const transactions = bank.getUserTransactions(bank.currentUser.id);
+            
+            transactions.forEach(transaction => {
+                const isSender = transaction.senderId === bank.currentUser.id;
+                const transactionItem = document.createElement('li');
+                transactionItem.className = `transaction-item ${isSender ? 'debit' : 'credit'}`;
+                
+                const date = new Date(transaction.timestamp).toLocaleString('ru-RU');
+                
+                transactionItem.innerHTML = `
+                    <div class="transaction-details">
+                        <div class="transaction-text">
+                            ${isSender ? 
+                                `Перевод для ${transaction.recipientName}` : 
+                                `Перевод от ${transaction.senderName}`}
+                            ${transaction.message ? `(${transaction.message})` : ''}
+                        </div>
+                        <div class="transaction-time">${date}</div>
+                    </div>
+                    <div class="transaction-amount">
+                        ${isSender ? '-' : '+'}${transaction.amount} ₽
+                    </div>
+                `;
+                
+                transactionsList.appendChild(transactionItem);
+            });
+        }
+
+        function initUpgrades() {
+            const upgradesContainer = document.getElementById('upgradesContainer');
+            upgradesContainer.innerHTML = '';
+            
+            if (!bank.currentUser) return;
+            
+            upgrades.forEach(upgrade => {
+                const isPurchased = bank.currentUser.upgrades.includes(upgrade.id);
+                const canAfford = bank.currentUser.balance >= upgrade.cost;
+                
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = `upgrade-item ${isPurchased || !canAfford ? 'disabled' : ''}`;
+                upgradeElement.innerHTML = `
+                    <div class="upgrade-name">${upgrade.name}</div>
+                    <div class="upgrade-cost">Стоимость: ${upgrade.cost} ₽</div>
+                    <div class="upgrade-income">+${upgrade.incomeIncrease} ${upgrade.type === 'click' ? '₽/клик' : '₽/сек'}</div>
+                `;
+                
+                if (!isPurchased && canAfford) {
+                    upgradeElement.addEventListener('click', () => buyUpgrade(upgrade));
+                }
+                
+                upgradesContainer.appendChild(upgradeElement);
+            });
+        }
+
+        function buyUpgrade(upgrade) {
+            if (!bank.currentUser) return;
+            
+            const result = bank.buyUpgrade(bank.currentUser.id, upgrade);
+            
+            if (result.success) {
+                showNotification(`Улучшение "${upgrade.name}" приобретено!`, 'success');
+                updateBalance();
+                initUpgrades();
+            }
+        }
+
+        function startPassiveIncome() {
+            setInterval(() => {
+                if (!bank.currentUser || bank.currentUser.passiveIncome <= 0) return;
+                
+                const newBalance = bank.currentUser.balance + bank.currentUser.passiveIncome;
+                bank.updateUser(bank.currentUser.id, { balance: newBalance });
+                updateBalance();
+                
+                // Добавляем запись о пассивном доходе иногда
+                if (Math.random() > 0.9) {
+                    loadTransactions();
+                }
+            }, 1000);
+        }
+
+        function logout() {
+            bank.logout();
+            mainInterface.style.display = 'none';
+            authContainer.style.display = 'flex';
+            
+            // Очищаем формы
+            loginForm.reset();
+            registerForm.reset();
+            showAuthForm('login');
+        }
+
+        // Обработчики событий
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            loginUser(email, password);
         });
 
-        // Обработчик перевода
-        transferForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            registerUser(name, email, password, confirmPassword);
+        });
+
+        document.getElementById('clickButton').addEventListener('click', () => {
+            if (!bank.currentUser) return;
+            
+            const result = bank.addClick(bank.currentUser.id);
+            if (result) {
+                updateBalance();
+                
+                // Анимация кнопки
+                const clickButton = document.getElementById('clickButton');
+                clickButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    clickButton.style.transform = 'scale(1)';
+                }, 100);
+            }
+        });
+
+        document.getElementById('transferForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const recipientSelect = document.getElementById('recipient');
-            const amountInput = document.getElementById('amount');
-            const messageInput = document.getElementById('message');
+            if (!bank.currentUser) return;
             
-            const recipient = recipientSelect.value;
-            const amount = parseInt(amountInput.value);
-            const message = messageInput.value;
+            const recipientId = document.getElementById('recipient').value;
+            const amount = parseInt(document.getElementById('amount').value);
+            const message = document.getElementById('message').value;
             
-            if (!recipient) {
-                showNotification('Выберите получателя перевода');
+            if (!recipientId) {
+                showNotification('Выберите получателя', 'error');
                 return;
             }
             
             if (amount < 1) {
-                showNotification('Сумма перевода должна быть положительной');
+                showNotification('Сумма должна быть больше 0', 'error');
                 return;
             }
             
-            if (amount > balance) {
-                showNotification('Недостаточно средств на счете');
-                return;
-            }
+            const result = bank.transferMoney(bank.currentUser.id, recipientId, amount, message);
             
-            // Список получателей
-            const recipients = {
-                'user2': 'Анна Петрова',
-                'user3': 'Сергей Смирнов',
-                'user4': 'Ольга Козлова',
-                'user5': 'Дмитрий Волков'
-            };
-            
-            const recipientName = recipients[recipient];
-            
-            // Выполнение перевода
-            balance -= amount;
-            updateBalance();
-            
-            // Добавление транзакции
-            addTransaction(recipientName, amount, 'debit', message);
-            
-            // Показ уведомления
-            showNotification(`Перевод ${amount}₽ для ${recipientName} выполнен успешно!`);
-            
-            // Сброс формы
-            transferForm.reset();
-        });
-
-        // Пассивный доход (каждую секунду)
-        setInterval(() => {
-            if (passiveIncome > 0) {
-                balance += passiveIncome;
+            if (result.success) {
+                showNotification(`Перевод ${amount}₽ выполнен успешно!`, 'success');
                 updateBalance();
-                
-                // Добавляем запись о пассивном доходе каждые 10 секунд
-                if (Math.random() > 0.7) {
-                    addTransaction('', passiveIncome, 'credit', 'Пассивный доход');
-                }
+                loadUsersList();
+                loadTransactions();
+                document.getElementById('transferForm').reset();
+            } else {
+                showNotification(result.message, 'error');
             }
-        }, 1000);
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            updateBalance();
-            initUpgrades();
-            
-            // Добавляем несколько начальных транзакций
-            addTransaction('', 1000, 'credit', 'Начальный баланс');
-            addTransaction('Анна Петрова', 150, 'debit', 'За кофе');
-            addTransaction('Сергей Смирнов', 500, 'debit', 'Совместный ужин');
         });
+
+        // Проверяем, есть ли уже авторизованный пользователь
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                const loginResult = bank.login(user.email, user.password);
+                if (loginResult.success) {
+                    showMainInterface(loginResult.user);
+                }
+            } catch (e) {
+                localStorage.removeItem('currentUser');
+            }
+        }
+
+        // Сохраняем текущего пользователя при изменениях
+        setInterval(() => {
+            if (bank.currentUser) {
+                localStorage.setItem('currentUser', JSON.stringify({
+                    email: bank.currentUser.email,
+                    password: bank.users.find(u => u.id === bank.currentUser.id)?.password
+                }));
+            }
+        }, 5000);
     </script>
 </body>
 </html>
