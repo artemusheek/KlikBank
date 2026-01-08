@@ -3,247 +3,605 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏦 KlikBank - Банк с кликером!</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Банк "ФинансПро"</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: #4fc3f7;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .balance-card h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #bbdefb;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 700;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #bbdefb;
+        }
+
+        .clicker-area {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #clickButton {
+            background: linear-gradient(45deg, #4fc3f7, #2979ff);
+            border: none;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 10px 20px rgba(41, 121, 255, 0.3);
+            margin: 20px 0;
+        }
+
+        #clickButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 25px rgba(41, 121, 255, 0.4);
+        }
+
+        #clickButton:active {
+            transform: scale(0.95);
+        }
+
+        .clicker-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .click-stat {
+            text-align: center;
+        }
+
+        .click-stat h4 {
+            font-size: 16px;
+            color: #bbdefb;
+            margin-bottom: 5px;
+        }
+
+        .click-stat p {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .transfer-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 16px;
+            color: #bbdefb;
+        }
+
+        input, select {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        button {
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(45deg, #4caf50, #2e7d32);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 125, 50, 0.3);
+        }
+
+        .transactions {
+            margin-top: 30px;
+        }
+
+        .transactions h3 {
+            margin-bottom: 15px;
+        }
+
+        #transactionsList {
+            list-style-type: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4fc3f7;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .transaction-item.debit {
+            border-left-color: #f44336;
+        }
+
+        .transaction-item.credit {
+            border-left-color: #4caf50;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            color: #bbdefb;
+        }
+
+        .upgrades {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .upgrade-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .upgrade-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-5px);
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-name {
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .upgrade-cost {
+            color: #ffb74d;
+            margin-top: 5px;
+        }
+
+        .upgrade-income {
+            color: #4caf50;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Шапка -->
         <header>
             <div class="logo">
-                <i class="fas fa-coins"></i>
-                <h1>KlikBank</h1>
+                <i class="fas fa-university"></i>
+                <h1>Банк "ФинансПро"</h1>
             </div>
-            <div class="header-balance" id="headerBalance">
-                ⚡ <span>0</span>
+            <div class="user-info">
+                <p><i class="fas fa-user"></i> Клиент: Иван Иванов</p>
             </div>
         </header>
 
-        <!-- Основной контент -->
-        <main>
-            <!-- Экран входа/регистрации -->
-            <div id="authScreen" class="auth-screen">
-                <div class="auth-card">
-                    <h2><i class="fas fa-user-circle"></i> Вход в KlikBank</h2>
-                    
-                    <div class="tabs">
-                        <button class="tab-btn active" onclick="showTab('login')">Вход</button>
-                        <button class="tab-btn" onclick="showTab('register')">Регистрация</button>
+        <div class="balance-card">
+            <h2>Ваш баланс</h2>
+            <div class="balance-amount" id="balance">1 000 ₽</div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h3><i class="fas fa-mouse-pointer"></i> Заработок кликами</h3>
+                <div class="clicker-area">
+                    <p>Кликайте на кнопку, чтобы зарабатывать деньги</p>
+                    <button id="clickButton">
+                        <i class="fas fa-coins"></i><br>
+                        Кликнуть!
+                    </button>
+                    <div class="clicker-info">
+                        <div class="click-stat">
+                            <h4>Кликов</h4>
+                            <p id="clickCount">0</p>
+                        </div>
+                        <div class="click-stat">
+                            <h4>Доход за клик</h4>
+                            <p id="incomePerClick">1 ₽</p>
+                        </div>
+                        <div class="click-stat">
+                            <h4>Пассивный доход</h4>
+                            <p id="passiveIncome">0 ₽/сек</p>
+                        </div>
                     </div>
-                    
-                    <!-- Форма входа -->
-                    <form id="loginForm" class="auth-form active">
-                        <input type="text" id="loginUsername" placeholder="Логин" required>
-                        <input type="password" id="loginPassword" placeholder="Пароль" required>
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-sign-in-alt"></i> Войти
-                        </button>
-                    </form>
-                    
-                    <!-- Форма регистрации -->
-                    <form id="registerForm" class="auth-form">
-                        <input type="text" id="regUsername" placeholder="Придумайте логин" required>
-                        <input type="password" id="regPassword" placeholder="Придумайте пароль" required>
-                        <input type="password" id="regConfirmPassword" placeholder="Повторите пароль" required>
-                        <button type="submit" class="btn-success">
-                            <i class="fas fa-user-plus"></i> Зарегистрироваться
-                        </button>
-                    </form>
-                    
-                    <div class="test-users">
-                        <h3><i class="fas fa-vial"></i> Тестовые пользователи:</h3>
-                        <p><strong>Логин:</strong> user1 <strong>Пароль:</strong> 123</p>
-                        <p><strong>Логин:</strong> user2 <strong>Пароль:</strong> 123</p>
-                        <p><strong>Логин:</strong> admin <strong>Пароль:</strong> admin</p>
-                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px;"><i class="fas fa-chart-line"></i> Улучшения</h3>
+                <div class="upgrades" id="upgradesContainer">
+                    <!-- Улучшения будут добавлены через JavaScript -->
                 </div>
             </div>
 
-            <!-- Основной интерфейс (скрыт до входа) -->
-            <div id="mainApp" class="main-app hidden">
-                <!-- Навигация -->
-                <nav class="app-nav">
-                    <button class="nav-btn active" onclick="showSection('clicker')">
-                        <i class="fas fa-mouse-pointer"></i> Кликер
-                    </button>
-                    <button class="nav-btn" onclick="showSection('transfers')">
-                        <i class="fas fa-exchange-alt"></i> Переводы
-                    </button>
-                    <button class="nav-btn" onclick="showSection('shop')">
-                        <i class="fas fa-store"></i> Магазин
-                    </button>
-                    <button class="nav-btn" onclick="showSection('users')">
-                        <i class="fas fa-users"></i> Пользователи
-                    </button>
-                    <button class="nav-btn" onclick="showSection('history')">
-                        <i class="fas fa-history"></i> История
-                    </button>
-                    <button class="nav-btn logout-btn" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </button>
-                </nav>
-
-                <!-- Секция кликера -->
-                <section id="clickerSection" class="app-section">
-                    <div class="clicker-container">
-                        <div class="stats">
-                            <div class="stat-card">
-                                <h3><i class="fas fa-coins"></i> Баланс</h3>
-                                <p class="big-number" id="balanceDisplay">0 ⚡</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3><i class="fas fa-bolt"></i> За клик</h3>
-                                <p class="big-number" id="perClickDisplay">1 ⚡</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3><i class="fas fa-robot"></i> Автокликеры</h3>
-                                <p class="big-number" id="autoClickersDisplay">0</p>
-                            </div>
-                        </div>
-                        
-                        <div class="clicker-area">
-                            <button id="clickButton" class="click-button">
-                                <i class="fas fa-hand-pointer"></i>
-                                <span>КЛИКАЙ ЗА ДЕНЬГИ!</span>
-                            </button>
-                            <div class="click-info">
-                                <p>Нажми чтобы получить <span id="clickValue">1</span> ⚡</p>
-                                <p>Автоматический доход: <span id="autoIncome">0</span> ⚡/сек</p>
-                            </div>
-                        </div>
+            <div class="panel">
+                <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
+                <form class="transfer-form" id="transferForm">
+                    <div class="form-group">
+                        <label for="recipient">Получатель</label>
+                        <select id="recipient" required>
+                            <option value="" disabled selected>Выберите получателя</option>
+                            <option value="user2">Анна Петрова</option>
+                            <option value="user3">Сергей Смирнов</option>
+                            <option value="user4">Ольга Козлова</option>
+                            <option value="user5">Дмитрий Волков</option>
+                        </select>
                     </div>
-                </section>
-
-                <!-- Секция переводов -->
-                <section id="transfersSection" class="app-section hidden">
-                    <div class="transfer-container">
-                        <div class="transfer-card">
-                            <h3><i class="fas fa-paper-plane"></i> Перевод средств</h3>
-                            <div class="transfer-form">
-                                <div class="form-group">
-                                    <label>Получатель:</label>
-                                    <select id="transferTo" class="form-control">
-                                        <option value="">Выберите пользователя</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Сумма (⚡):</label>
-                                    <input type="number" id="transferAmount" min="1" class="form-control" placeholder="Сколько перевести?">
-                                </div>
-                                <div class="form-group">
-                                    <label>Комментарий:</label>
-                                    <input type="text" id="transferComment" class="form-control" placeholder="На что перевод?">
-                                </div>
-                                <button onclick="makeTransfer()" class="btn-primary">
-                                    <i class="fas fa-paper-plane"></i> Отправить перевод
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="transfer-card">
-                            <h3><i class="fas fa-history"></i> Последние переводы</h3>
-                            <div id="transfersList" class="transfers-list">
-                                <p class="empty-state">Нет переводов</p>
-                            </div>
-                        </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Сумма перевода (₽)</label>
+                        <input type="number" id="amount" min="1" required placeholder="Введите сумму">
                     </div>
-                </section>
-
-                <!-- Секция магазина -->
-                <section id="shopSection" class="app-section hidden">
-                    <div class="shop-container">
-                        <h2><i class="fas fa-shopping-cart"></i> Магазин улучшений</h2>
-                        <div class="upgrades-grid">
-                            <!-- Автокликеры -->
-                            <div class="upgrade-card">
-                                <div class="upgrade-icon">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <h3>Автокликер</h3>
-                                <p>Автоматически кликает 1 раз в секунду</p>
-                                <div class="upgrade-price">
-                                    <i class="fas fa-coins"></i> <span id="autoClickerPrice">10</span> ⚡
-                                </div>
-                                <button onclick="buyUpgrade('autoclicker')" class="btn-buy">
-                                    <i class="fas fa-shopping-cart"></i> Купить
-                                </button>
-                            </div>
-                            
-                            <!-- Улучшение клика x2 -->
-                            <div class="upgrade-card">
-                                <div class="upgrade-icon">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
-                                <h3>Усиленный клик</h3>
-                                <p>Увеличивает доход за клик в 2 раза</p>
-                                <div class="upgrade-price">
-                                    <i class="fas fa-coins"></i> <span id="clickMultiplierPrice">50</span> ⚡
-                                </div>
-                                <button onclick="buyUpgrade('multiplier')" class="btn-buy">
-                                    <i class="fas fa-shopping-cart"></i> Купить
-                                </button>
-                            </div>
-                            
-                            <!-- Мега кликер -->
-                            <div class="upgrade-card">
-                                <div class="upgrade-icon">
-                                    <i class="fas fa-gem"></i>
-                                </div>
-                                <h3>Мега кликер</h3>
-                                <p>Дает +5 кликов за раз</p>
-                                <div class="upgrade-price">
-                                    <i class="fas fa-coins"></i> <span id="megaClickerPrice">100</span> ⚡
-                                </div>
-                                <button onclick="buyUpgrade('megaclicker')" class="btn-buy">
-                                    <i class="fas fa-shopping-cart"></i> Купить
-                                </button>
-                            </div>
-                            
-                            <!-- Банковский счет -->
-                            <div class="upgrade-card">
-                                <div class="upgrade-icon">
-                                    <i class="fas fa-piggy-bank"></i>
-                                </div>
-                                <h3>Банковский счет</h3>
-                                <p>+2% к балансу каждый час</p>
-                                <div class="upgrade-price">
-                                    <i class="fas fa-coins"></i> <span id="bankAccountPrice">500</span> ⚡
-                                </div>
-                                <button onclick="buyUpgrade('bank')" class="btn-buy">
-                                    <i class="fas fa-shopping-cart"></i> Купить
-                                </button>
-                            </div>
-                        </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Сообщение получателю (необязательно)</label>
+                        <input type="text" id="message" placeholder="Например: За обед">
                     </div>
-                </section>
+                    
+                    <button type="submit">
+                        <i class="fas fa-paper-plane"></i> Отправить перевод
+                    </button>
+                </form>
 
-                <!-- Секция пользователей -->
-                <section id="usersSection" class="app-section hidden">
-                    <div class="users-container">
-                        <h2><i class="fas fa-users"></i> Все пользователи</h2>
-                        <div id="usersList" class="users-list">
-                            <!-- Список пользователей загрузится из JS -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Секция истории -->
-                <section id="historySection" class="app-section hidden">
-                    <div class="history-container">
-                        <h2><i class="fas fa-history"></i> История операций</h2>
-                        <div id="historyList" class="history-list">
-                            <!-- История загрузится из JS -->
-                        </div>
-                    </div>
-                </section>
+                <div class="transactions">
+                    <h3><i class="fas fa-history"></i> История операций</h3>
+                    <ul id="transactionsList">
+                        <!-- Транзакции будут добавляться здесь -->
+                    </ul>
+                </div>
             </div>
-        </main>
+        </div>
 
-        <!-- Уведомления -->
-        <div id="notification" class="notification"></div>
+        <footer>
+            <p>Банк "ФинансПро" © 2023. Все права защищены.</p>
+            <p>Круглосуточная поддержка: 8-800-123-45-67</p>
+        </footer>
     </div>
 
-    <script src="script.js"></script>
+    <div class="notification" id="notification">
+        Перевод выполнен успешно!
+    </div>
+
+    <script>
+        // Инициализация переменных
+        let balance = 1000;
+        let clickCount = 0;
+        let incomePerClick = 1;
+        let passiveIncome = 0;
+        let upgrades = [
+            { id: 1, name: "Улучшенная мышь", cost: 100, incomeIncrease: 1, type: "click", purchased: false },
+            { id: 2, name: "Процессор для майнинга", cost: 500, incomeIncrease: 5, type: "click", purchased: false },
+            { id: 3, name: "Банковский вклад", cost: 1000, incomeIncrease: 2, type: "passive", purchased: false },
+            { id: 4, name: "Инвестиционный фонд", cost: 5000, incomeIncrease: 10, type: "passive", purchased: false },
+            { id: 5, name: "Криптоферма", cost: 15000, incomeIncrease: 50, type: "passive", purchased: false }
+        ];
+
+        // Элементы DOM
+        const balanceElement = document.getElementById('balance');
+        const clickCountElement = document.getElementById('clickCount');
+        const incomePerClickElement = document.getElementById('incomePerClick');
+        const passiveIncomeElement = document.getElementById('passiveIncome');
+        const clickButton = document.getElementById('clickButton');
+        const transferForm = document.getElementById('transferForm');
+        const transactionsList = document.getElementById('transactionsList');
+        const notification = document.getElementById('notification');
+        const upgradesContainer = document.getElementById('upgradesContainer');
+
+        // Инициализация улучшений
+        function initUpgrades() {
+            upgradesContainer.innerHTML = '';
+            upgrades.forEach(upgrade => {
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = `upgrade-item ${upgrade.purchased ? 'disabled' : balance < upgrade.cost ? 'disabled' : ''}`;
+                upgradeElement.innerHTML = `
+                    <div class="upgrade-name">${upgrade.name}</div>
+                    <div class="upgrade-cost">Стоимость: ${upgrade.cost} ₽</div>
+                    <div class="upgrade-income">+${upgrade.incomeIncrease} ${upgrade.type === 'click' ? '₽/клик' : '₽/сек'}</div>
+                `;
+                
+                if (!upgrade.purchased && balance >= upgrade.cost) {
+                    upgradeElement.addEventListener('click', () => purchaseUpgrade(upgrade.id));
+                }
+                
+                upgradesContainer.appendChild(upgradeElement);
+            });
+        }
+
+        // Покупка улучшения
+        function purchaseUpgrade(upgradeId) {
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            
+            if (!upgrade || upgrade.purchased || balance < upgrade.cost) return;
+            
+            balance -= upgrade.cost;
+            upgrade.purchased = true;
+            
+            if (upgrade.type === 'click') {
+                incomePerClick += upgrade.incomeIncrease;
+                incomePerClickElement.textContent = `${incomePerClick} ₽`;
+                showNotification(`Куплено улучшение: ${upgrade.name}! Теперь вы получаете +${upgrade.incomeIncrease}₽ за клик`);
+            } else {
+                passiveIncome += upgrade.incomeIncrease;
+                passiveIncomeElement.textContent = `${passiveIncome} ₽/сек`;
+                showNotification(`Куплено улучшение: ${upgrade.name}! Теперь ваш пассивный доход: +${upgrade.incomeIncrease}₽/сек`);
+            }
+            
+            updateBalance();
+            initUpgrades();
+        }
+
+        // Обновление баланса
+        function updateBalance() {
+            balanceElement.textContent = `${balance.toLocaleString('ru-RU')} ₽`;
+        }
+
+        // Показ уведомления
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Добавление транзакции
+        function addTransaction(recipientName, amount, type, message = '') {
+            const transactionItem = document.createElement('li');
+            transactionItem.className = `transaction-item ${type}`;
+            
+            const date = new Date().toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const transactionText = type === 'debit' 
+                ? `Перевод ${recipientName}: -${amount}₽ ${message ? `(${message})` : ''}`
+                : `Пополнение: +${amount}₽`;
+            
+            transactionItem.innerHTML = `
+                <div class="transaction-details">
+                    <div class="transaction-text">${transactionText}</div>
+                    <div class="transaction-time">${date}</div>
+                </div>
+                <div class="transaction-amount ${type}">
+                    ${type === 'debit' ? '-' : '+'}${amount} ₽
+                </div>
+            `;
+            
+            transactionsList.prepend(transactionItem);
+        }
+
+        // Обработчик клика
+        clickButton.addEventListener('click', () => {
+            clickCount++;
+            balance += incomePerClick;
+            
+            clickCountElement.textContent = clickCount.toLocaleString('ru-RU');
+            updateBalance();
+            
+            // Анимация кнопки
+            clickButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                clickButton.style.transform = 'scale(1)';
+            }, 100);
+        });
+
+        // Обработчик перевода
+        transferForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const recipientSelect = document.getElementById('recipient');
+            const amountInput = document.getElementById('amount');
+            const messageInput = document.getElementById('message');
+            
+            const recipient = recipientSelect.value;
+            const amount = parseInt(amountInput.value);
+            const message = messageInput.value;
+            
+            if (!recipient) {
+                showNotification('Выберите получателя перевода');
+                return;
+            }
+            
+            if (amount < 1) {
+                showNotification('Сумма перевода должна быть положительной');
+                return;
+            }
+            
+            if (amount > balance) {
+                showNotification('Недостаточно средств на счете');
+                return;
+            }
+            
+            // Список получателей
+            const recipients = {
+                'user2': 'Анна Петрова',
+                'user3': 'Сергей Смирнов',
+                'user4': 'Ольга Козлова',
+                'user5': 'Дмитрий Волков'
+            };
+            
+            const recipientName = recipients[recipient];
+            
+            // Выполнение перевода
+            balance -= amount;
+            updateBalance();
+            
+            // Добавление транзакции
+            addTransaction(recipientName, amount, 'debit', message);
+            
+            // Показ уведомления
+            showNotification(`Перевод ${amount}₽ для ${recipientName} выполнен успешно!`);
+            
+            // Сброс формы
+            transferForm.reset();
+        });
+
+        // Пассивный доход (каждую секунду)
+        setInterval(() => {
+            if (passiveIncome > 0) {
+                balance += passiveIncome;
+                updateBalance();
+                
+                // Добавляем запись о пассивном доходе каждые 10 секунд
+                if (Math.random() > 0.7) {
+                    addTransaction('', passiveIncome, 'credit', 'Пассивный доход');
+                }
+            }
+        }, 1000);
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBalance();
+            initUpgrades();
+            
+            // Добавляем несколько начальных транзакций
+            addTransaction('', 1000, 'credit', 'Начальный баланс');
+            addTransaction('Анна Петрова', 150, 'debit', 'За кофе');
+            addTransaction('Сергей Смирнов', 500, 'debit', 'Совместный ужин');
+        });
+    </script>
 </body>
 </html>
