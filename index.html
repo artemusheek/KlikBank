@@ -473,6 +473,28 @@
         .user-balance {
             color: #ffb74d;
         }
+        
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
         footer {
             text-align: center;
@@ -558,7 +580,12 @@
 
             <div class="main-content">
                 <div class="panel">
-                    <h3><i class="fas fa-mouse-pointer"></i> Заработок кликами</h3>
+                    <div class="panel-header">
+                        <h3><i class="fas fa-mouse-pointer"></i> Заработок кликами</h3>
+                        <button class="refresh-btn" onclick="updateUserData()">
+                            <i class="fas fa-sync-alt"></i> Обновить
+                        </button>
+                    </div>
                     <div class="clicker-area">
                         <p>Кликайте на кнопку, чтобы зарабатывать деньги</p>
                         <button id="clickButton">
@@ -588,7 +615,12 @@
                 </div>
 
                 <div class="panel">
-                    <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
+                    <div class="panel-header">
+                        <h3><i class="fas fa-exchange-alt"></i> Перевод средств</h3>
+                        <button class="refresh-btn" onclick="loadUsersList()">
+                            <i class="fas fa-sync-alt"></i> Обновить
+                        </button>
+                    </div>
                     
                     <div class="users-list">
                         <h4>Другие пользователи:</h4>
@@ -633,6 +665,12 @@
                 <p>Банк "ФинансПро" © 2023. Все права защищены.</p>
                 <p>Круглосуточная поддержка: 8-800-123-45-67</p>
                 <p>Всего пользователей: <span id="totalUsers">1</span></p>
+                <p style="margin-top: 10px; font-size: 12px; color: #90caf9;">
+                    <strong>Тестовые пользователи:</strong><br>
+                    1. ivan@test.com / 123456<br>
+                    2. anna@test.com / 123456<br>
+                    3. sergey@test.com / 123456
+                </p>
             </footer>
         </div>
     </div>
@@ -641,198 +679,118 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // БАНКОВСКАЯ СИСТЕМА
-        class BankSystem {
-            constructor() {
-                this.users = JSON.parse(localStorage.getItem('bankUsers')) || [];
-                this.transactions = JSON.parse(localStorage.getItem('bankTransactions')) || [];
-                this.currentUser = null;
-                
-                // Инициализация тестового пользователя, если нет пользователей
-                if (this.users.length === 0) {
-                    this.createTestUsers();
-                }
-            }
-            
-            createTestUsers() {
-                const testUsers = [
-                    { id: '1', name: 'Иван Иванов', email: 'ivan@test.com', password: '123456', balance: 5000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: [] },
-                    { id: '2', name: 'Анна Петрова', email: 'anna@test.com', password: '123456', balance: 3000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: [] },
-                    { id: '3', name: 'Сергей Смирнов', email: 'sergey@test.com', password: '123456', balance: 7000, clickCount: 0, incomePerClick: 1, passiveIncome: 0, upgrades: [] }
-                ];
-                
-                this.users = testUsers;
-                this.saveUsers();
-            }
-            
-            saveUsers() {
-                localStorage.setItem('bankUsers', JSON.stringify(this.users));
-            }
-            
-            saveTransactions() {
-                localStorage.setItem('bankTransactions', JSON.stringify(this.transactions));
-            }
-            
-            register(name, email, password) {
-                // Проверка, существует ли пользователь
-                if (this.users.find(u => u.email === email)) {
-                    return { success: false, message: 'Пользователь с таким email уже существует' };
-                }
-                
-                // Создание нового пользователя
-                const newUser = {
-                    id: Date.now().toString(),
-                    name,
-                    email,
-                    password,
-                    balance: 1000,
-                    clickCount: 0,
-                    incomePerClick: 1,
-                    passiveIncome: 0,
-                    upgrades: []
-                };
-                
-                this.users.push(newUser);
-                this.saveUsers();
-                
-                return { success: true, user: newUser };
-            }
-            
-            login(email, password) {
-                const user = this.users.find(u => u.email === email && u.password === password);
-                
-                if (!user) {
-                    return { success: false, message: 'Неверный email или пароль' };
-                }
-                
-                // Не храним пароль в текущем пользователе
-                const { password: _, ...userWithoutPassword } = user;
-                this.currentUser = userWithoutPassword;
-                
-                return { success: true, user: userWithoutPassword };
-            }
-            
-            logout() {
-                this.currentUser = null;
-            }
-            
-            getAllUsersExceptCurrent() {
-                if (!this.currentUser) return [];
-                return this.users.filter(user => user.id !== this.currentUser.id);
-            }
-            
-            getUserById(userId) {
-                return this.users.find(user => user.id === userId);
-            }
-            
-            updateUser(userId, updates) {
-                const userIndex = this.users.findIndex(u => u.id === userId);
-                if (userIndex !== -1) {
-                    this.users[userIndex] = { ...this.users[userIndex], ...updates };
-                    this.saveUsers();
-                    
-                    // Обновляем текущего пользователя, если это он
-                    if (this.currentUser && this.currentUser.id === userId) {
-                        this.currentUser = { ...this.currentUser, ...updates };
-                    }
-                }
-            }
-            
-            transferMoney(senderId, recipientId, amount, message = '') {
-                const sender = this.getUserById(senderId);
-                const recipient = this.getUserById(recipientId);
-                
-                if (!sender || !recipient) {
-                    return { success: false, message: 'Пользователь не найден' };
-                }
-                
-                if (sender.balance < amount) {
-                    return { success: false, message: 'Недостаточно средств' };
-                }
-                
-                // Выполняем перевод
-                this.updateUser(senderId, { balance: sender.balance - amount });
-                this.updateUser(recipientId, { balance: recipient.balance + amount });
-                
-                // Создаем транзакцию
-                const transaction = {
-                    id: Date.now().toString(),
-                    senderId,
-                    recipientId,
-                    senderName: sender.name,
-                    recipientName: recipient.name,
-                    amount,
-                    message,
-                    timestamp: new Date().toISOString()
-                };
-                
-                this.transactions.push(transaction);
-                this.saveTransactions();
-                
-                return { 
-                    success: true, 
-                    transaction,
-                    senderBalance: sender.balance - amount,
-                    recipientBalance: recipient.balance + amount
-                };
-            }
-            
-            getUserTransactions(userId) {
-                return this.transactions
-                    .filter(t => t.senderId === userId || t.recipientId === userId)
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            }
-            
-            addClick(userId) {
-                const user = this.getUserById(userId);
-                if (!user) return;
-                
-                const newBalance = user.balance + user.incomePerClick;
-                const newClickCount = user.clickCount + 1;
-                
-                this.updateUser(userId, {
-                    balance: newBalance,
-                    clickCount: newClickCount
-                });
-                
-                return { newBalance, newClickCount };
-            }
-            
-            buyUpgrade(userId, upgrade) {
-                const user = this.getUserById(userId);
-                if (!user || user.balance < upgrade.cost || user.upgrades.includes(upgrade.id)) {
-                    return { success: false };
-                }
-                
-                user.balance -= upgrade.cost;
-                user.upgrades.push(upgrade.id);
-                
-                if (upgrade.type === 'click') {
-                    user.incomePerClick += upgrade.incomeIncrease;
-                } else {
-                    user.passiveIncome += upgrade.incomeIncrease;
-                }
-                
-                this.updateUser(userId, {
-                    balance: user.balance,
-                    upgrades: user.upgrades,
-                    incomePerClick: user.incomePerClick,
-                    passiveIncome: user.passiveIncome
-                });
-                
-                return { success: true, user };
-            }
-        }
-
-        // ИНИЦИАЛИЗАЦИЯ
-        const bank = new BankSystem();
-        const upgrades = [
+        // ОБЩАЯ БАНКОВСКАЯ СИСТЕМА В ОДНОМ LOCALSTORAGE
+        const BANK_STORAGE_KEY = 'bank_system_data';
+        
+        // Инициализация улучшений
+        const UPGRADES = [
             { id: 1, name: "Улучшенная мышь", cost: 100, incomeIncrease: 1, type: "click" },
             { id: 2, name: "Процессор для майнинга", cost: 500, incomeIncrease: 5, type: "click" },
             { id: 3, name: "Банковский вклад", cost: 1000, incomeIncrease: 2, type: "passive" },
             { id: 4, name: "Инвестиционный фонд", cost: 5000, incomeIncrease: 10, type: "passive" },
             { id: 5, name: "Криптоферма", cost: 15000, incomeIncrease: 50, type: "passive" }
         ];
+
+        // Функции для работы с хранилищем
+        function getBankData() {
+            const data = localStorage.getItem(BANK_STORAGE_KEY);
+            if (!data) {
+                // Создаем начальные данные
+                const initialData = {
+                    users: [
+                        { 
+                            id: '1', 
+                            name: 'Иван Иванов', 
+                            email: 'ivan@test.com', 
+                            password: '123456', 
+                            balance: 5000, 
+                            clickCount: 0, 
+                            incomePerClick: 1, 
+                            passiveIncome: 0, 
+                            upgrades: [],
+                            lastUpdate: Date.now()
+                        },
+                        { 
+                            id: '2', 
+                            name: 'Анна Петрова', 
+                            email: 'anna@test.com', 
+                            password: '123456', 
+                            balance: 3000, 
+                            clickCount: 0, 
+                            incomePerClick: 1, 
+                            passiveIncome: 0, 
+                            upgrades: [],
+                            lastUpdate: Date.now()
+                        },
+                        { 
+                            id: '3', 
+                            name: 'Сергей Смирнов', 
+                            email: 'sergey@test.com', 
+                            password: '123456', 
+                            balance: 7000, 
+                            clickCount: 0, 
+                            incomePerClick: 1, 
+                            passiveIncome: 0, 
+                            upgrades: [],
+                            lastUpdate: Date.now()
+                        }
+                    ],
+                    transactions: []
+                };
+                localStorage.setItem(BANK_STORAGE_KEY, JSON.stringify(initialData));
+                return initialData;
+            }
+            return JSON.parse(data);
+        }
+
+        function saveBankData(data) {
+            localStorage.setItem(BANK_STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function updateUserInStorage(userId, updates) {
+            const bankData = getBankData();
+            const userIndex = bankData.users.findIndex(u => u.id === userId);
+            
+            if (userIndex !== -1) {
+                bankData.users[userIndex] = { 
+                    ...bankData.users[userIndex], 
+                    ...updates,
+                    lastUpdate: Date.now()
+                };
+                saveBankData(bankData);
+                return bankData.users[userIndex];
+            }
+            return null;
+        }
+
+        function getUserFromStorage(userId) {
+            const bankData = getBankData();
+            return bankData.users.find(u => u.id === userId);
+        }
+
+        function getAllUsersFromStorage() {
+            return getBankData().users;
+        }
+
+        function addTransactionToStorage(transaction) {
+            const bankData = getBankData();
+            bankData.transactions.push({
+                ...transaction,
+                id: Date.now().toString(),
+                timestamp: new Date().toISOString()
+            });
+            saveBankData(bankData);
+        }
+
+        function getUserTransactionsFromStorage(userId) {
+            const bankData = getBankData();
+            return bankData.transactions
+                .filter(t => t.senderId === userId || t.recipientId === userId)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        // Текущий пользователь
+        let currentUser = null;
 
         // DOM элементы
         const authContainer = document.getElementById('authContainer');
@@ -865,43 +823,72 @@
         }
 
         function loginUser(email, password) {
-            const result = bank.login(email, password);
+            const bankData = getBankData();
+            const user = bankData.users.find(u => u.email === email && u.password === password);
             
-            if (result.success) {
-                showMainInterface(result.user);
-            } else {
-                showNotification(result.message, 'error');
+            if (!user) {
+                showNotification('Неверный email или пароль', 'error');
+                return false;
             }
+            
+            // Убираем пароль из объекта пользователя
+            const { password: _, ...userWithoutPassword } = user;
+            currentUser = userWithoutPassword;
+            
+            // Сохраняем ID текущего пользователя
+            localStorage.setItem('currentUserId', user.id);
+            
+            showMainInterface();
+            return true;
         }
 
         function registerUser(name, email, password, confirmPassword) {
             if (password !== confirmPassword) {
                 showNotification('Пароли не совпадают', 'error');
-                return;
+                return false;
             }
             
             if (password.length < 6) {
                 showNotification('Пароль должен содержать минимум 6 символов', 'error');
-                return;
+                return false;
             }
             
-            const result = bank.register(name, email, password);
+            const bankData = getBankData();
             
-            if (result.success) {
-                showNotification('Регистрация успешна! Теперь вы можете войти.', 'success');
-                showAuthForm('login');
-                document.getElementById('loginEmail').value = email;
-            } else {
-                showNotification(result.message, 'error');
+            // Проверка, существует ли пользователь
+            if (bankData.users.find(u => u.email === email)) {
+                showNotification('Пользователь с таким email уже существует', 'error');
+                return false;
             }
+            
+            // Создание нового пользователя
+            const newUser = {
+                id: Date.now().toString(),
+                name,
+                email,
+                password,
+                balance: 1000,
+                clickCount: 0,
+                incomePerClick: 1,
+                passiveIncome: 0,
+                upgrades: [],
+                lastUpdate: Date.now()
+            };
+            
+            bankData.users.push(newUser);
+            saveBankData(bankData);
+            
+            showNotification('Регистрация успешна! Теперь вы можете войти.', 'success');
+            showAuthForm('login');
+            document.getElementById('loginEmail').value = email;
+            return true;
         }
 
-        function showMainInterface(user) {
+        function showMainInterface() {
             authContainer.style.display = 'none';
             mainInterface.style.display = 'block';
             
-            updateUserInfo(user);
-            updateBalance();
+            updateUserData();
             loadUsersList();
             loadTransactions();
             initUpgrades();
@@ -910,17 +897,26 @@
             startPassiveIncome();
         }
 
-        function updateUserInfo(user) {
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userEmail').textContent = user.email;
-        }
-
-        function updateBalance() {
-            if (!bank.currentUser) return;
-            document.getElementById('balance').textContent = `${bank.currentUser.balance.toLocaleString('ru-RU')} ₽`;
-            document.getElementById('clickCount').textContent = bank.currentUser.clickCount.toLocaleString('ru-RU');
-            document.getElementById('incomePerClick').textContent = `${bank.currentUser.incomePerClick} ₽`;
-            document.getElementById('passiveIncome').textContent = `${bank.currentUser.passiveIncome} ₽/сек`;
+        function updateUserData() {
+            if (!currentUser) return;
+            
+            // Получаем актуальные данные пользователя
+            const updatedUser = getUserFromStorage(currentUser.id);
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+            }
+            
+            // Обновляем интерфейс
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('balance').textContent = `${currentUser.balance.toLocaleString('ru-RU')} ₽`;
+            document.getElementById('clickCount').textContent = currentUser.clickCount.toLocaleString('ru-RU');
+            document.getElementById('incomePerClick').textContent = `${currentUser.incomePerClick} ₽`;
+            document.getElementById('passiveIncome').textContent = `${currentUser.passiveIncome} ₽/сек`;
+            
+            // Обновляем улучшения
+            initUpgrades();
         }
 
         function loadUsersList() {
@@ -930,8 +926,10 @@
             usersList.innerHTML = '';
             recipientSelect.innerHTML = '<option value="" disabled selected>Выберите пользователя</option>';
             
-            const otherUsers = bank.getAllUsersExceptCurrent();
-            document.getElementById('totalUsers').textContent = bank.users.length;
+            const allUsers = getAllUsersFromStorage();
+            const otherUsers = allUsers.filter(user => user.id !== currentUser.id);
+            
+            document.getElementById('totalUsers').textContent = allUsers.length;
             
             otherUsers.forEach(user => {
                 // Добавляем в список пользователей
@@ -958,12 +956,17 @@
             const transactionsList = document.getElementById('transactionsList');
             transactionsList.innerHTML = '';
             
-            if (!bank.currentUser) return;
+            if (!currentUser) return;
             
-            const transactions = bank.getUserTransactions(bank.currentUser.id);
+            const transactions = getUserTransactionsFromStorage(currentUser.id);
+            
+            if (transactions.length === 0) {
+                transactionsList.innerHTML = '<li style="text-align: center; color: #bbb;">Нет операций</li>';
+                return;
+            }
             
             transactions.forEach(transaction => {
-                const isSender = transaction.senderId === bank.currentUser.id;
+                const isSender = transaction.senderId === currentUser.id;
                 const transactionItem = document.createElement('li');
                 transactionItem.className = `transaction-item ${isSender ? 'debit' : 'credit'}`;
                 
@@ -975,7 +978,7 @@
                             ${isSender ? 
                                 `Перевод для ${transaction.recipientName}` : 
                                 `Перевод от ${transaction.senderName}`}
-                            ${transaction.message ? `(${transaction.message})` : ''}
+                            ${transaction.message ? ` (${transaction.message})` : ''}
                         </div>
                         <div class="transaction-time">${date}</div>
                     </div>
@@ -992,11 +995,11 @@
             const upgradesContainer = document.getElementById('upgradesContainer');
             upgradesContainer.innerHTML = '';
             
-            if (!bank.currentUser) return;
+            if (!currentUser) return;
             
-            upgrades.forEach(upgrade => {
-                const isPurchased = bank.currentUser.upgrades.includes(upgrade.id);
-                const canAfford = bank.currentUser.balance >= upgrade.cost;
+            UPGRADES.forEach(upgrade => {
+                const isPurchased = currentUser.upgrades.includes(upgrade.id);
+                const canAfford = currentUser.balance >= upgrade.cost;
                 
                 const upgradeElement = document.createElement('div');
                 upgradeElement.className = `upgrade-item ${isPurchased || !canAfford ? 'disabled' : ''}`;
@@ -1004,9 +1007,11 @@
                     <div class="upgrade-name">${upgrade.name}</div>
                     <div class="upgrade-cost">Стоимость: ${upgrade.cost} ₽</div>
                     <div class="upgrade-income">+${upgrade.incomeIncrease} ${upgrade.type === 'click' ? '₽/клик' : '₽/сек'}</div>
+                    ${isPurchased ? '<div style="color: #4caf50; margin-top: 5px;"><i class="fas fa-check"></i> Куплено</div>' : ''}
                 `;
                 
                 if (!isPurchased && canAfford) {
+                    upgradeElement.style.cursor = 'pointer';
                     upgradeElement.addEventListener('click', () => buyUpgrade(upgrade));
                 }
                 
@@ -1015,34 +1020,148 @@
         }
 
         function buyUpgrade(upgrade) {
-            if (!bank.currentUser) return;
-            
-            const result = bank.buyUpgrade(bank.currentUser.id, upgrade);
-            
-            if (result.success) {
-                showNotification(`Улучшение "${upgrade.name}" приобретено!`, 'success');
-                updateBalance();
-                initUpgrades();
+            if (!currentUser || currentUser.balance < upgrade.cost) {
+                showNotification('Недостаточно средств', 'error');
+                return;
             }
+            
+            if (currentUser.upgrades.includes(upgrade.id)) {
+                showNotification('Улучшение уже куплено', 'error');
+                return;
+            }
+            
+            // Обновляем баланс
+            const newBalance = currentUser.balance - upgrade.cost;
+            const newUpgrades = [...currentUser.upgrades, upgrade.id];
+            
+            // Применяем улучшение
+            let updates = {
+                balance: newBalance,
+                upgrades: newUpgrades
+            };
+            
+            if (upgrade.type === 'click') {
+                updates.incomePerClick = currentUser.incomePerClick + upgrade.incomeIncrease;
+            } else {
+                updates.passiveIncome = currentUser.passiveIncome + upgrade.incomeIncrease;
+            }
+            
+            // Сохраняем изменения
+            const updatedUser = updateUserInStorage(currentUser.id, updates);
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+                
+                showNotification(`Улучшение "${upgrade.name}" приобретено!`, 'success');
+                updateUserData();
+            }
+        }
+
+        function addClick() {
+            if (!currentUser) return;
+            
+            // Начисляем деньги за клик
+            const newBalance = currentUser.balance + currentUser.incomePerClick;
+            const newClickCount = currentUser.clickCount + 1;
+            
+            const updatedUser = updateUserInStorage(currentUser.id, {
+                balance: newBalance,
+                clickCount: newClickCount
+            });
+            
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+                updateUserData();
+                
+                // Анимация кнопки
+                const clickButton = document.getElementById('clickButton');
+                clickButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    clickButton.style.transform = 'scale(1)';
+                }, 100);
+            }
+        }
+
+        function transferMoney(recipientId, amount, message) {
+            if (!currentUser) return false;
+            
+            if (currentUser.balance < amount) {
+                showNotification('Недостаточно средств', 'error');
+                return false;
+            }
+            
+            if (amount < 1) {
+                showNotification('Сумма должна быть больше 0', 'error');
+                return false;
+            }
+            
+            // Получаем данные отправителя и получателя
+            const sender = getUserFromStorage(currentUser.id);
+            const recipient = getUserFromStorage(recipientId);
+            
+            if (!sender || !recipient) {
+                showNotification('Пользователь не найден', 'error');
+                return false;
+            }
+            
+            // Обновляем балансы
+            const senderNewBalance = sender.balance - amount;
+            const recipientNewBalance = recipient.balance + amount;
+            
+            updateUserInStorage(sender.id, { balance: senderNewBalance });
+            updateUserInStorage(recipient.id, { balance: recipientNewBalance });
+            
+            // Создаем транзакцию
+            const transaction = {
+                senderId: sender.id,
+                recipientId: recipient.id,
+                senderName: sender.name,
+                recipientName: recipient.name,
+                amount,
+                message
+            };
+            
+            addTransactionToStorage(transaction);
+            
+            // Обновляем данные текущего пользователя
+            const updatedUser = getUserFromStorage(currentUser.id);
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+            }
+            
+            showNotification(`Перевод ${amount}₽ для ${recipient.name} выполнен успешно!`, 'success');
+            updateUserData();
+            loadUsersList();
+            loadTransactions();
+            
+            return true;
         }
 
         function startPassiveIncome() {
             setInterval(() => {
-                if (!bank.currentUser || bank.currentUser.passiveIncome <= 0) return;
+                if (!currentUser || currentUser.passiveIncome <= 0) return;
                 
-                const newBalance = bank.currentUser.balance + bank.currentUser.passiveIncome;
-                bank.updateUser(bank.currentUser.id, { balance: newBalance });
-                updateBalance();
+                const newBalance = currentUser.balance + currentUser.passiveIncome;
+                const updatedUser = updateUserInStorage(currentUser.id, { balance: newBalance });
                 
-                // Добавляем запись о пассивном доходе иногда
-                if (Math.random() > 0.9) {
-                    loadTransactions();
+                if (updatedUser) {
+                    const { password: _, ...userWithoutPassword } = updatedUser;
+                    currentUser = userWithoutPassword;
+                    updateUserData();
+                    
+                    // Показываем уведомление о пассивном доходе раз в 10 секунд
+                    if (Math.random() > 0.9) {
+                        showNotification(`Пассивный доход: +${currentUser.passiveIncome}₽`, 'success');
+                    }
                 }
             }, 1000);
         }
 
         function logout() {
-            bank.logout();
+            currentUser = null;
+            localStorage.removeItem('currentUserId');
             mainInterface.style.display = 'none';
             authContainer.style.display = 'flex';
             
@@ -1069,26 +1188,10 @@
             registerUser(name, email, password, confirmPassword);
         });
 
-        document.getElementById('clickButton').addEventListener('click', () => {
-            if (!bank.currentUser) return;
-            
-            const result = bank.addClick(bank.currentUser.id);
-            if (result) {
-                updateBalance();
-                
-                // Анимация кнопки
-                const clickButton = document.getElementById('clickButton');
-                clickButton.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    clickButton.style.transform = 'scale(1)';
-                }, 100);
-            }
-        });
+        document.getElementById('clickButton').addEventListener('click', addClick);
 
         document.getElementById('transferForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            if (!bank.currentUser) return;
             
             const recipientId = document.getElementById('recipient').value;
             const amount = parseInt(document.getElementById('amount').value);
@@ -1099,47 +1202,29 @@
                 return;
             }
             
-            if (amount < 1) {
-                showNotification('Сумма должна быть больше 0', 'error');
-                return;
-            }
-            
-            const result = bank.transferMoney(bank.currentUser.id, recipientId, amount, message);
-            
-            if (result.success) {
-                showNotification(`Перевод ${amount}₽ выполнен успешно!`, 'success');
-                updateBalance();
-                loadUsersList();
-                loadTransactions();
+            const success = transferMoney(recipientId, amount, message);
+            if (success) {
                 document.getElementById('transferForm').reset();
-            } else {
-                showNotification(result.message, 'error');
             }
         });
 
-        // Проверяем, есть ли уже авторизованный пользователь
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser) {
-            try {
-                const user = JSON.parse(savedUser);
-                const loginResult = bank.login(user.email, user.password);
-                if (loginResult.success) {
-                    showMainInterface(loginResult.user);
-                }
-            } catch (e) {
-                localStorage.removeItem('currentUser');
+        // Проверяем, есть ли сохраненная сессия
+        const savedUserId = localStorage.getItem('currentUserId');
+        if (savedUserId) {
+            const user = getUserFromStorage(savedUserId);
+            if (user) {
+                const { password: _, ...userWithoutPassword } = user;
+                currentUser = userWithoutPassword;
+                showMainInterface();
             }
         }
 
-        // Сохраняем текущего пользователя при изменениях
-        setInterval(() => {
-            if (bank.currentUser) {
-                localStorage.setItem('currentUser', JSON.stringify({
-                    email: bank.currentUser.email,
-                    password: bank.users.find(u => u.id === bank.currentUser.id)?.password
-                }));
-            }
-        }, 5000);
+        // Функция для тестирования (можно удалить в продакшене)
+        window.debugBank = function() {
+            console.log('Текущий пользователь:', currentUser);
+            console.log('Все пользователи:', getAllUsersFromStorage());
+            console.log('Данные банка:', getBankData());
+        };
     </script>
 </body>
 </html>
