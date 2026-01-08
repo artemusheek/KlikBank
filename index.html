@@ -187,6 +187,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
         }
 
         .balance-card h2 {
@@ -200,6 +201,40 @@
             font-weight: 700;
             color: #4fc3f7;
             text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        /* Секретные кнопки для разработчика */
+        .dev-buttons {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .dev-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+
+        .dev-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .dev-btn.add-money {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: rgba(76, 175, 80, 0.4);
+        }
+
+        .dev-btn.max-upgrade {
+            background: rgba(156, 39, 176, 0.2);
+            border-color: rgba(156, 39, 176, 0.4);
         }
 
         .main-content {
@@ -666,6 +701,11 @@
             </header>
 
             <div class="balance-card">
+                <div class="dev-buttons">
+                    <button class="dev-btn add-money" onclick="addMoney(1000)" title="Добавить 1000 рублей">+1к</button>
+                    <button class="dev-btn add-money" onclick="addMoney(10000)" title="Добавить 10000 рублей">+10к</button>
+                    <button class="dev-btn max-upgrade" onclick="maxUpgrades()" title="Макс. улучшения">🚀</button>
+                </div>
                 <h2>Ваш баланс</h2>
                 <div class="balance-amount" id="balance">1 000 ₽</div>
             </div>
@@ -763,6 +803,9 @@
                 <p>Банк "ФинансПро" © 2023. Все права защищены.</p>
                 <p>Круглосуточная поддержка: 8-800-123-45-67</p>
                 <p>Всего пользователей: <span id="totalUsers">0</span></p>
+                <p style="margin-top: 10px; font-size: 12px; color: #90caf9;">
+                    💡 <strong>Подсказка:</strong> Используйте кнопки над балансом для быстрого добавления денег
+                </p>
             </footer>
         </div>
     </div>
@@ -898,6 +941,69 @@
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         const notification = document.getElementById('notification');
+
+        // ФУНКЦИИ ДЛЯ ДОБАВЛЕНИЯ ДЕНЕГ - ОНИ РАБОТАЮТ!
+        window.addMoney = function(amount = 10000) {
+            if (!currentUser) {
+                showNotification('Сначала войдите в систему!', 'error');
+                return;
+            }
+            
+            const updatedUser = updateUserInStorage(currentUser.id, {
+                balance: currentUser.balance + amount
+            });
+            
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+                updateUserData();
+                showNotification(`✅ Добавлено ${amount.toLocaleString('ru-RU')}₽!`, 'success');
+            }
+        };
+
+        window.add1000 = function() { addMoney(1000); };
+        window.add5000 = function() { addMoney(5000); };
+        window.add10000 = function() { addMoney(10000); };
+        window.add50000 = function() { addMoney(50000); };
+
+        window.maxUpgrades = function() {
+            if (!currentUser) {
+                showNotification('Сначала войдите в систему!', 'error');
+                return;
+            }
+            
+            // Добавляем много денег
+            addMoney(1000000);
+            
+            // Покупаем максимальные уровни всех улучшений
+            UPGRADES.forEach(upgrade => {
+                const level = currentUser.upgrades[upgrade.id] || 0;
+                const maxLevel = upgrade.maxLevel;
+                
+                if (level < maxLevel) {
+                    const levelsToAdd = maxLevel - level;
+                    
+                    if (upgrade.type === 'click') {
+                        currentUser.incomePerClick += upgrade.incomeIncrease * levelsToAdd;
+                    } else {
+                        currentUser.passiveIncome += upgrade.incomeIncrease * levelsToAdd;
+                    }
+                    
+                    currentUser.upgrades[upgrade.id] = maxLevel;
+                }
+            });
+            
+            // Сохраняем изменения
+            updateUserInStorage(currentUser.id, {
+                balance: currentUser.balance,
+                incomePerClick: currentUser.incomePerClick,
+                passiveIncome: currentUser.passiveIncome,
+                upgrades: currentUser.upgrades
+            });
+            
+            updateUserData();
+            showNotification('🎮 Все улучшения максимально прокачаны!', 'success');
+        };
 
         // Функции аутентификации
         function showAuthForm(formType) {
@@ -1412,35 +1518,27 @@
             }
         }
 
-        // Функция для добавления тестовых пользователей
-        window.addTestUsers = function() {
-            const bankData = getBankData();
-            const testNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Ольга'];
+        // Показать все команды в консоли
+        window.showMoneyCommands = function() {
+            console.log('%c=== КОМАНДЫ ДЛЯ ДОБАВЛЕНИЯ ДЕНЕГ ===', 'color: #4fc3f7; font-size: 16px; font-weight: bold;');
+            console.log('%caddMoney(сумма) - добавить указанную сумму', 'color: #4caf50;');
+            console.log('%cadd1000() - добавить 1000 рублей', 'color: #4caf50;');
+            console.log('%cadd5000() - добавить 5000 рублей', 'color: #4caf50;');
+            console.log('%cadd10000() - добавить 10000 рублей', 'color: #4caf50;');
+            console.log('%cadd50000() - добавить 50000 рублей', 'color: #4caf50;');
+            console.log('%cmaxUpgrades() - получить много денег и макс. улучшения', 'color: #ff9800;');
+            console.log('%cshowMoneyCommands() - показать этот список команд', 'color: #2196f3;');
+            console.log('====================================');
             
-            testNames.forEach(name => {
-                // Проверяем, существует ли уже пользователь с таким именем
-                if (!bankData.users.find(u => u.name === name)) {
-                    const testUser = {
-                        id: generateUserId(),
-                        name: name,
-                        password: '123456',
-                        balance: 5000 + Math.floor(Math.random() * 5000),
-                        clickCount: 0,
-                        incomePerClick: 1,
-                        passiveIncome: 0,
-                        upgrades: {},
-                        lastUpdate: Date.now(),
-                        registeredAt: new Date().toISOString()
-                    };
-                    
-                    bankData.users.push(testUser);
-                }
-            });
-            
-            saveBankData(bankData);
-            updateTotalUsers();
-            showNotification('Добавлены тестовые пользователи (пароль: 123456)', 'info');
+            showNotification('Команды показаны в консоли (F12)', 'info');
         };
+
+        // Автоматически показываем команды при загрузке
+        setTimeout(() => {
+            console.log('%c💸 Для добавления денег используйте:', 'color: #4fc3f7; font-size: 14px;');
+            console.log('%c1. Кнопки над балансом (+1к, +10к, 🚀)', 'color: #4caf50;');
+            console.log('%c2. Команды в консоли: showMoneyCommands()', 'color: #4caf50;');
+        }, 2000);
     </script>
 </body>
 </html>
