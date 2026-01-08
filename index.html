@@ -155,6 +155,13 @@
         .user-info .name {
             font-weight: 600;
             color: #4fc3f7;
+            font-size: 18px;
+        }
+
+        .user-info .id {
+            font-size: 14px;
+            color: #bbdefb;
+            margin-top: 2px;
         }
 
         .logout-btn {
@@ -499,18 +506,21 @@
         .user-result-name {
             font-weight: 600;
             color: #4fc3f7;
+            font-size: 16px;
         }
 
-        .user-result-email {
-            font-size: 14px;
+        .user-result-id {
+            font-size: 12px;
             color: #bbdefb;
             margin-top: 2px;
+            font-family: monospace;
         }
 
         .user-result-balance {
             color: #ffb74d;
             font-weight: 600;
             margin-left: 15px;
+            font-size: 16px;
         }
 
         .empty-state {
@@ -544,6 +554,12 @@
             color: #4fc3f7;
         }
 
+        .selected-user-id {
+            font-size: 12px;
+            color: #bbdefb;
+            font-family: monospace;
+        }
+
         .clear-selection {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -552,6 +568,28 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 12px;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         footer {
@@ -574,8 +612,8 @@
             
             <form class="auth-form active" id="loginForm">
                 <div class="input-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
+                    <label for="loginName">Имя пользователя</label>
+                    <input type="text" id="loginName" required placeholder="Введите ваше имя">
                 </div>
                 
                 <div class="input-group">
@@ -588,13 +626,9 @@
             
             <form class="auth-form" id="registerForm">
                 <div class="input-group">
-                    <label for="registerName">Имя и фамилия</label>
-                    <input type="text" id="registerName" required>
-                </div>
-                
-                <div class="input-group">
-                    <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" required>
+                    <label for="registerName">Имя пользователя</label>
+                    <input type="text" id="registerName" required placeholder="Придумайте уникальное имя">
+                    <small style="color: #bbdefb; font-size: 12px; margin-top: 5px;">Это имя будет видно другим пользователям</small>
                 </div>
                 
                 <div class="input-group">
@@ -622,8 +656,8 @@
                 </div>
                 <div class="user-menu">
                     <div class="user-info">
-                        <div class="name" id="userName">Иван Иванов</div>
-                        <div class="email" id="userEmail">user@example.com</div>
+                        <div class="name" id="userName">Пользователь</div>
+                        <div class="id" id="userId">ID: ---</div>
                     </div>
                     <button class="logout-btn" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i> Выйти
@@ -678,7 +712,7 @@
                     <!-- Секция поиска пользователей -->
                     <div class="search-section">
                         <div class="search-box">
-                            <input type="text" id="searchInput" placeholder="Введите имя или email пользователя...">
+                            <input type="text" id="searchInput" placeholder="Введите имя пользователя для поиска...">
                             <button type="button" class="search-btn" onclick="searchUsers()">
                                 <i class="fas fa-search"></i> Найти
                             </button>
@@ -688,6 +722,7 @@
                             <div class="empty-state">
                                 <i class="fas fa-search"></i>
                                 <p>Начните поиск пользователей</p>
+                                <p style="font-size: 14px; margin-top: 10px;">Введите имя пользователя и нажмите "Найти"</p>
                             </div>
                         </div>
                         
@@ -737,7 +772,7 @@
 
     <script>
         // ОБЩАЯ БАНКОВСКАЯ СИСТЕМА
-        const BANK_STORAGE_KEY = 'bank_system_data_v3';
+        const BANK_STORAGE_KEY = 'bank_system_simple';
         
         // Улучшения с возможностью многократной покупки
         const UPGRADES = [
@@ -787,6 +822,11 @@
                 maxLevel: 10
             }
         ];
+
+        // Генерация уникального ID
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
 
         // Функции для работы с хранилищем
         function getBankData() {
@@ -882,12 +922,12 @@
             }, 3000);
         }
 
-        function loginUser(email, password) {
+        function loginUser(name, password) {
             const bankData = getBankData();
-            const user = bankData.users.find(u => u.email === email && u.password === password);
+            const user = bankData.users.find(u => u.name === name && u.password === password);
             
             if (!user) {
-                showNotification('Неверный email или пароль', 'error');
+                showNotification('Неверное имя пользователя или пароль', 'error');
                 return false;
             }
             
@@ -900,7 +940,12 @@
             return true;
         }
 
-        function registerUser(name, email, password, confirmPassword) {
+        function registerUser(name, password, confirmPassword) {
+            if (!name || name.trim().length < 3) {
+                showNotification('Имя должно содержать минимум 3 символа', 'error');
+                return false;
+            }
+            
             if (password !== confirmPassword) {
                 showNotification('Пароли не совпадают', 'error');
                 return false;
@@ -913,30 +958,37 @@
             
             const bankData = getBankData();
             
-            if (bankData.users.find(u => u.email === email)) {
-                showNotification('Пользователь с таким email уже существует', 'error');
+            // Проверяем уникальность имени
+            if (bankData.users.find(u => u.name.toLowerCase() === name.toLowerCase())) {
+                showNotification('Это имя пользователя уже занято', 'error');
                 return false;
             }
             
+            // Создаем нового пользователя
             const newUser = {
-                id: Date.now().toString(),
-                name,
-                email,
+                id: generateUserId(),
+                name: name.trim(),
                 password,
                 balance: 1000,
                 clickCount: 0,
                 incomePerClick: 1,
                 passiveIncome: 0,
                 upgrades: {},
-                lastUpdate: Date.now()
+                lastUpdate: Date.now(),
+                registeredAt: new Date().toISOString()
             };
             
             bankData.users.push(newUser);
             saveBankData(bankData);
             
-            showNotification('Регистрация успешна! Теперь вы можете войти.', 'success');
-            showAuthForm('login');
-            document.getElementById('loginEmail').value = email;
+            showNotification(`Регистрация успешна! Добро пожаловать, ${name}!`, 'success');
+            
+            // Автоматически входим после регистрации
+            const { password: _, ...userWithoutPassword } = newUser;
+            currentUser = userWithoutPassword;
+            localStorage.setItem('currentUserId', newUser.id);
+            showMainInterface();
+            
             return true;
         }
 
@@ -962,7 +1014,7 @@
             }
             
             document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('userId').textContent = `ID: ${currentUser.id.substring(0, 12)}...`;
             document.getElementById('balance').textContent = `${currentUser.balance.toLocaleString('ru-RU')} ₽`;
             document.getElementById('clickCount').textContent = currentUser.clickCount.toLocaleString('ru-RU');
             document.getElementById('incomePerClick').textContent = `${currentUser.incomePerClick} ₽`;
@@ -984,7 +1036,7 @@
                 searchResults.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
-                        <p>Введите имя или email для поиска</p>
+                        <p>Введите имя пользователя для поиска</p>
                     </div>`;
                 return;
             }
@@ -992,8 +1044,7 @@
             const allUsers = getAllUsersFromStorage();
             const filteredUsers = allUsers.filter(user => 
                 user.id !== currentUser?.id && 
-                (user.name.toLowerCase().includes(searchTerm) || 
-                 user.email.toLowerCase().includes(searchTerm))
+                user.name.toLowerCase().includes(searchTerm)
             );
             
             if (filteredUsers.length === 0) {
@@ -1013,7 +1064,7 @@
                 userResult.innerHTML = `
                     <div class="user-result-info">
                         <div class="user-result-name">${user.name}</div>
-                        <div class="user-result-email">${user.email}</div>
+                        <div class="user-result-id">ID: ${user.id.substring(0, 12)}...</div>
                     </div>
                     <div class="user-result-balance">${user.balance.toLocaleString('ru-RU')} ₽</div>
                 `;
@@ -1037,7 +1088,7 @@
                 <div class="selected-user-info">
                     <div>
                         <div class="selected-user-text">Получатель: ${user.name}</div>
-                        <div style="font-size: 14px; color: #bbdefb;">${user.email}</div>
+                        <div class="selected-user-id">ID: ${user.id.substring(0, 12)}...</div>
                     </div>
                     <div>
                         <div style="color: #ffb74d; font-weight: 600;">${user.balance.toLocaleString('ru-RU')} ₽</div>
@@ -1052,7 +1103,6 @@
             document.getElementById('transferBtn').disabled = false;
             document.getElementById('transferBtn').innerHTML = `<i class="fas fa-paper-plane"></i> Перевести ${user.name}`;
             
-            // Фокус на поле суммы
             document.getElementById('amount').focus();
         }
 
@@ -1310,18 +1360,17 @@
         // Обработчики событий
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const name = document.getElementById('loginName').value.trim();
             const password = document.getElementById('loginPassword').value;
-            loginUser(email, password);
+            loginUser(name, password);
         });
 
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
+            const name = document.getElementById('registerName').value.trim();
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            registerUser(name, email, password, confirmPassword);
+            registerUser(name, password, confirmPassword);
         });
 
         document.getElementById('clickButton').addEventListener('click', addClick);
@@ -1363,32 +1412,34 @@
             }
         }
 
-        // Функции для тестирования
-        window.addTestUser = function() {
+        // Функция для добавления тестовых пользователей
+        window.addTestUsers = function() {
             const bankData = getBankData();
-            const testUser = {
-                id: 'test_' + Date.now(),
-                name: 'Тестовый Пользователь',
-                email: 'test' + Date.now() + '@test.com',
-                password: '123456',
-                balance: 5000,
-                clickCount: 0,
-                incomePerClick: 1,
-                passiveIncome: 0,
-                upgrades: {},
-                lastUpdate: Date.now()
-            };
+            const testNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Ольга'];
             
-            bankData.users.push(testUser);
+            testNames.forEach(name => {
+                // Проверяем, существует ли уже пользователь с таким именем
+                if (!bankData.users.find(u => u.name === name)) {
+                    const testUser = {
+                        id: generateUserId(),
+                        name: name,
+                        password: '123456',
+                        balance: 5000 + Math.floor(Math.random() * 5000),
+                        clickCount: 0,
+                        incomePerClick: 1,
+                        passiveIncome: 0,
+                        upgrades: {},
+                        lastUpdate: Date.now(),
+                        registeredAt: new Date().toISOString()
+                    };
+                    
+                    bankData.users.push(testUser);
+                }
+            });
+            
             saveBankData(bankData);
             updateTotalUsers();
-            showNotification('Тестовый пользователь добавлен', 'info');
-        };
-
-        window.showAllUsers = function() {
-            const users = getAllUsersFromStorage();
-            console.log('Все пользователи:', users);
-            showNotification(`Всего пользователей: ${users.length}`, 'info');
+            showNotification('Добавлены тестовые пользователи (пароль: 123456)', 'info');
         };
     </script>
 </body>
