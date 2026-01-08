@@ -164,6 +164,17 @@
             margin-top: 2px;
         }
 
+        .user-info .admin-badge {
+            background: #ff9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 3px;
+            display: inline-block;
+        }
+
         .logout-btn {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -240,6 +251,16 @@
         .dev-btn.clear-money {
             background: rgba(244, 67, 54, 0.2);
             border-color: rgba(244, 67, 54, 0.4);
+        }
+
+        .dev-btn.set-money {
+            background: rgba(255, 152, 0, 0.2);
+            border-color: rgba(255, 152, 0, 0.4);
+        }
+
+        .dev-btn.admin-mode {
+            background: rgba(33, 150, 243, 0.2);
+            border-color: rgba(33, 150, 243, 0.4);
         }
 
         .main-content {
@@ -645,7 +666,7 @@
             color: #bbdefb;
         }
 
-        .e-info {
+        .dev-mode-info {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             padding: 15px;
@@ -653,7 +674,7 @@
             border-left: 4px solid #ff9800;
         }
 
-        .e-info h4 {
+        .dev-mode-info h4 {
             color: #ffb74d;
             margin-bottom: 8px;
         }
@@ -662,6 +683,122 @@
             font-size: 13px;
             color: #bbdefb;
             line-height: 1.5;
+        }
+
+        .admin-panel {
+            background: rgba(33, 150, 243, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .admin-panel h4 {
+            color: #2196f3;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .admin-control {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .admin-control:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .admin-control i {
+            font-size: 20px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .admin-control.set-money {
+            background: rgba(255, 152, 0, 0.15);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .admin-control.give-money {
+            background: rgba(76, 175, 80, 0.15);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .admin-control.reset-user {
+            background: rgba(244, 67, 54, 0.15);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .admin-control.view-all {
+            background: rgba(156, 39, 176, 0.15);
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: #1a237e;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h3 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .modal-btn.primary {
+            background: #2196f3;
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
         }
     </style>
 </head>
@@ -722,6 +859,7 @@
                     <div class="user-info">
                         <div class="name" id="userName">Пользователь</div>
                         <div class="id" id="userId">ID: ---</div>
+                        <div class="admin-badge" id="adminBadge" style="display: none;">👑 АДМИН</div>
                     </div>
                     <button class="logout-btn" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i> Выйти
@@ -731,11 +869,48 @@
 
             <div class="balance-card">
                 <div class="dev-buttons">
-                    
+                    <button class="dev-btn add-money" onclick="addMoney(1000)" title="Добавить 1000 рублей">+1к</button>
+                    <button class="dev-btn add-money" onclick="addMoney(10000)" title="Добавить 10000 рублей">+10к</button>
+                    <button class="dev-btn set-money" onclick="showSetMoneyModal()" title="Установить точную сумму">💰</button>
+                    <button class="dev-btn max-upgrade" onclick="maxUpgrades()" title="Макс. улучшения">🚀</button>
+                    <button class="dev-btn clear-money" onclick="clearMoney()" title="Очистить деньги">🗑️</button>
+                    <button class="dev-btn admin-mode" onclick="toggleAdminMode()" title="Режим администратора">👑</button>
                 </div>
                 <h2>Ваш баланс</h2>
                 <div class="balance-amount" id="balance">1 000 ₽</div>
-                    
+                
+                <div class="dev-mode-info">
+                    <h4><i class="fas fa-tools"></i> Режим разработчика</h4>
+                    <p>
+                        <strong>Добавить:</strong> +1к (+1000₽) | +10к (+10000₽)<br>
+                        <strong>Установить:</strong> 💰 (любая сумма)<br>
+                        <strong>Макс. прокачка:</strong> 🚀 (1 млн + все улучшения)<br>
+                        <strong>Очистить:</strong> 🗑️ (оставить 1000₽)<br>
+                        <strong>Админ-режим:</strong> 👑 (права оператора)
+                    </p>
+                </div>
+
+                <!-- Админ-панель (показывается только в админ-режиме) -->
+                <div class="admin-panel" id="adminPanel" style="display: none;">
+                    <h4><i class="fas fa-user-shield"></i> Панель администратора</h4>
+                    <div class="admin-controls">
+                        <div class="admin-control set-money" onclick="showSetMoneyModal()">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <div>Установить деньги</div>
+                        </div>
+                        <div class="admin-control give-money" onclick="giveMoneyToUser()">
+                            <i class="fas fa-gift"></i>
+                            <div>Выдать деньги</div>
+                        </div>
+                        <div class="admin-control reset-user" onclick="resetUserData()">
+                            <i class="fas fa-redo"></i>
+                            <div>Сбросить пользователя</div>
+                        </div>
+                        <div class="admin-control view-all" onclick="viewAllUsers()">
+                            <i class="fas fa-users"></i>
+                            <div>Все пользователи</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -833,9 +1008,42 @@
                 <p>Круглосуточная поддержка: 8-800-123-45-67</p>
                 <p>Всего пользователей: <span id="totalUsers">0</span></p>
                 <p style="margin-top: 10px; font-size: 12px; color: #90caf9;">
-                    💡 <strong>Подсказка:</strong> Используйте кнопки над балансом для управления деньгами
+                    💡 <strong>Подсказка:</strong> В консоли (F12) используйте команды: admin(), setMoney(сумма)
                 </p>
             </footer>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div class="modal-overlay" id="setMoneyModal">
+        <div class="modal">
+            <h3><i class="fas fa-money-bill-wave"></i> Установить сумму денег</h3>
+            <div class="input-group">
+                <label for="customAmount">Введите сумму (₽)</label>
+                <input type="number" id="customAmount" min="0" placeholder="Например: 50000" value="1000">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeSetMoneyModal()">Отмена</button>
+                <button class="modal-btn primary" onclick="applySetMoney()">Установить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="giveMoneyModal">
+        <div class="modal">
+            <h3><i class="fas fa-gift"></i> Выдать деньги пользователю</h3>
+            <div class="input-group">
+                <label for="giveToUser">Имя пользователя</label>
+                <input type="text" id="giveToUser" placeholder="Введите имя пользователя">
+            </div>
+            <div class="input-group">
+                <label for="giveAmount">Сумма (₽)</label>
+                <input type="number" id="giveAmount" min="1" placeholder="Сумма для выдачи" value="1000">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeGiveMoneyModal()">Отмена</button>
+                <button class="modal-btn primary" onclick="applyGiveMoney()">Выдать</button>
+            </div>
         </div>
     </div>
 
@@ -963,6 +1171,7 @@
         // Текущий пользователь
         let currentUser = null;
         let selectedUser = null;
+        let isAdmin = false;
 
         // DOM элементы
         const authContainer = document.getElementById('authContainer');
@@ -970,6 +1179,158 @@
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         const notification = document.getElementById('notification');
+        const adminBadge = document.getElementById('adminBadge');
+        const adminPanel = document.getElementById('adminPanel');
+
+        // ========================
+        // АДМИН ФУНКЦИИ
+        // ========================
+
+        // Функция admin() - дает права оператора
+        window.admin = function() {
+            isAdmin = true;
+            updateAdminUI();
+            showNotification('👑 Активирован режим администратора!', 'success');
+            console.log('%c=== РЕЖИМ АДМИНИСТРАТОРА АКТИВИРОВАН ===', 'color: #ff9800; font-size: 16px; font-weight: bold;');
+            console.log('%cДоступные команды:', 'color: #2196f3; font-weight: bold;');
+            console.log('%csetMoney(сумма) - установить точную сумму денег', 'color: #4caf50;');
+            console.log('%caddMoney(сумма) - добавить сумму денег', 'color: #4caf50;');
+            console.log('%cclearMoney() - очистить деньги', 'color: #4caf50;');
+            console.log('%cresetAll() - полный сброс', 'color: #4caf50;');
+            console.log('%cgiveMoney(пользователь, сумма) - выдать деньги другому', 'color: #4caf50;');
+            console.log('%cresetUser(пользователь) - сбросить пользователя', 'color: #4caf50;');
+            console.log('%cviewAllUsers() - посмотреть всех пользователей', 'color: #4caf50;');
+            console.log('%cmaxUpgrades() - макс. улучшения', 'color: #4caf50;');
+            console.log('=========================================');
+        };
+
+        // Функция setMoney() - устанавливает точную сумму денег
+        window.setMoney = function(amount) {
+            if (!currentUser) {
+                showNotification('Сначала войдите в систему!', 'error');
+                return;
+            }
+            
+            if (typeof amount !== 'number' || amount < 0) {
+                showNotification('Введите корректную сумму (положительное число)', 'error');
+                return;
+            }
+            
+            const updatedUser = updateUserInStorage(currentUser.id, {
+                balance: amount
+            });
+            
+            if (updatedUser) {
+                const { password: _, ...userWithoutPassword } = updatedUser;
+                currentUser = userWithoutPassword;
+                updateUserData();
+                showNotification(`✅ Баланс установлен: ${amount.toLocaleString('ru-RU')}₽`, 'success');
+            }
+        };
+
+        // Функция giveMoney() - выдать деньги другому пользователю
+        window.giveMoney = function(userName, amount) {
+            if (!currentUser || !isAdmin) {
+                showNotification('Требуются права администратора!', 'error');
+                return;
+            }
+            
+            const bankData = getBankData();
+            const targetUser = bankData.users.find(u => u.name === userName);
+            
+            if (!targetUser) {
+                showNotification(`Пользователь "${userName}" не найден`, 'error');
+                return;
+            }
+            
+            if (targetUser.id === currentUser.id) {
+                showNotification('Нельзя выдать деньги самому себе', 'error');
+                return;
+            }
+            
+            updateUserInStorage(targetUser.id, {
+                balance: targetUser.balance + amount
+            });
+            
+            showNotification(`✅ Пользователю ${userName} выдано ${amount.toLocaleString('ru-RU')}₽`, 'success');
+        };
+
+        // Функция resetUser() - сбросить пользователя
+        window.resetUser = function(userName) {
+            if (!currentUser || !isAdmin) {
+                showNotification('Требуются права администратора!', 'error');
+                return;
+            }
+            
+            const bankData = getBankData();
+            const targetUser = bankData.users.find(u => u.name === userName);
+            
+            if (!targetUser) {
+                showNotification(`Пользователь "${userName}" не найден`, 'error');
+                return;
+            }
+            
+            if (confirm(`Сбросить пользователя "${userName}"? Баланс и улучшения будут обнулены.`)) {
+                updateUserInStorage(targetUser.id, {
+                    balance: 1000,
+                    clickCount: 0,
+                    incomePerClick: 1,
+                    passiveIncome: 0,
+                    upgrades: {}
+                });
+                
+                showNotification(`✅ Пользователь "${userName}" сброшен`, 'success');
+            }
+        };
+
+        // Функция viewAllUsers() - посмотреть всех пользователей
+        window.viewAllUsers = function() {
+            if (!currentUser || !isAdmin) {
+                showNotification('Требуются права администратора!', 'error');
+                return;
+            }
+            
+            const users = getAllUsersFromStorage();
+            console.log('%c=== ВСЕ ПОЛЬЗОВАТЕЛИ ===', 'color: #2196f3; font-size: 16px; font-weight: bold;');
+            users.forEach((user, index) => {
+                console.log(`%c${index + 1}. ${user.name}`, 'color: #4fc3f7; font-weight: bold;');
+                console.log(`   ID: ${user.id}`);
+                console.log(`   Баланс: ${user.balance.toLocaleString('ru-RU')}₽`);
+                console.log(`   Кликов: ${user.clickCount}`);
+                console.log(`   Доход за клик: ${user.incomePerClick}₽`);
+                console.log(`   Пассивный доход: ${user.passiveIncome}₽/сек`);
+                console.log(`   Улучшения: ${JSON.stringify(user.upgrades)}`);
+                console.log('---');
+            });
+            
+            showNotification(`Показано ${users.length} пользователей в консоли`, 'info');
+        };
+
+        // Обновление UI админ-режима
+        function updateAdminUI() {
+            if (isAdmin) {
+                adminBadge.style.display = 'inline-block';
+                adminPanel.style.display = 'block';
+            } else {
+                adminBadge.style.display = 'none';
+                adminPanel.style.display = 'none';
+            }
+        }
+
+        // Переключение админ-режима
+        function toggleAdminMode() {
+            if (isAdmin) {
+                isAdmin = false;
+                updateAdminUI();
+                showNotification('👑 Режим администратора отключен', 'warning');
+            } else {
+                admin();
+            }
+        }
+
+        // ========================
+        // ОСНОВНЫЕ ФУНКЦИИ
+        // ========================
 
         // ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ДЕНЬГАМИ
         window.addMoney = function(amount = 10000) {
@@ -1005,7 +1366,7 @@
             if (confirm(`Вы уверены, что хотите очистить деньги?\n\nТекущий баланс: ${currentUser.balance.toLocaleString('ru-RU')}₽\nБудет установлен баланс: 1 000₽\n\nУлучшения и история операций сохранятся.`)) {
                 
                 const updatedUser = updateUserInStorage(currentUser.id, {
-                    balance: 1000 // Возвращаем начальный баланс
+                    balance: 1000
                 });
                 
                 if (updatedUser) {
@@ -1017,7 +1378,7 @@
             }
         };
 
-        // ФУНКЦИЯ ПОЛНОСТЬЮ СБРОСИТЬ ВСЁ (деньги + улучшения)
+        // ФУНКЦИЯ ПОЛНОСТЬЮ СБРОСИТЬ ВСЁ
         window.resetAll = function() {
             if (!currentUser) {
                 showNotification('Сначала войдите в систему!', 'error');
@@ -1089,6 +1450,70 @@
             showNotification('🎮 Все улучшения максимально прокачаны!', 'success');
         };
 
+        // ========================
+        // МОДАЛЬНЫЕ ОКНА
+        // ========================
+
+        function showSetMoneyModal() {
+            document.getElementById('setMoneyModal').style.display = 'flex';
+            document.getElementById('customAmount').value = currentUser ? currentUser.balance : 1000;
+            document.getElementById('customAmount').focus();
+        }
+
+        function closeSetMoneyModal() {
+            document.getElementById('setMoneyModal').style.display = 'none';
+        }
+
+        function applySetMoney() {
+            const amount = parseInt(document.getElementById('customAmount').value);
+            if (amount >= 0) {
+                setMoney(amount);
+                closeSetMoneyModal();
+            } else {
+                showNotification('Сумма не может быть отрицательной!', 'error');
+            }
+        }
+
+        function giveMoneyToUser() {
+            document.getElementById('giveMoneyModal').style.display = 'flex';
+            document.getElementById('giveToUser').value = '';
+            document.getElementById('giveAmount').value = 1000;
+            document.getElementById('giveToUser').focus();
+        }
+
+        function closeGiveMoneyModal() {
+            document.getElementById('giveMoneyModal').style.display = 'none';
+        }
+
+        function applyGiveMoney() {
+            const userName = document.getElementById('giveToUser').value.trim();
+            const amount = parseInt(document.getElementById('giveAmount').value);
+            
+            if (!userName) {
+                showNotification('Введите имя пользователя!', 'error');
+                return;
+            }
+            
+            if (amount <= 0) {
+                showNotification('Сумма должна быть больше 0!', 'error');
+                return;
+            }
+            
+            giveMoney(userName, amount);
+            closeGiveMoneyModal();
+        }
+
+        function resetUserData() {
+            const userName = prompt('Введите имя пользователя для сброса:');
+            if (userName) {
+                resetUser(userName);
+            }
+        }
+
+        // ========================
+        // ОСТАЛЬНЫЕ ФУНКЦИИ
+        // ========================
+
         // Функции аутентификации
         function showAuthForm(formType) {
             document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
@@ -1124,6 +1549,9 @@
             const { password: _, ...userWithoutPassword } = user;
             currentUser = userWithoutPassword;
             localStorage.setItem('currentUserId', user.id);
+            
+            // Проверяем, был ли пользователь админом
+            isAdmin = user.isAdmin || false;
             
             showMainInterface();
             showNotification(`Добро пожаловать, ${user.name}!`, 'info');
@@ -1165,7 +1593,8 @@
                 passiveIncome: 0,
                 upgrades: {},
                 lastUpdate: Date.now(),
-                registeredAt: new Date().toISOString()
+                registeredAt: new Date().toISOString(),
+                isAdmin: false
             };
             
             bankData.users.push(newUser);
@@ -1190,6 +1619,7 @@
             loadTransactions();
             initUpgrades();
             updateTotalUsers();
+            updateAdminUI();
             
             startPassiveIncome();
         }
@@ -1538,6 +1968,7 @@
         function logout() {
             currentUser = null;
             selectedUser = null;
+            isAdmin = false;
             localStorage.removeItem('currentUserId');
             mainInterface.style.display = 'none';
             authContainer.style.display = 'flex';
@@ -1598,6 +2029,7 @@
             if (user) {
                 const { password: _, ...userWithoutPassword } = user;
                 currentUser = userWithoutPassword;
+                isAdmin = user.isAdmin || false;
                 showMainInterface();
             }
         }
@@ -1605,20 +2037,22 @@
         // Показать все команды в консоли
         window.showMoneyCommands = function() {
             console.log('%c=== КОМАНДЫ ДЛЯ УПРАВЛЕНИЯ ДЕНЬГАМИ ===', 'color: #4fc3f7; font-size: 16px; font-weight: bold;');
-            console.log('%cДобавление денег:', 'color: #4caf50; font-weight: bold;');
-            console.log('%caddMoney(сумма) - добавить указанную сумму', 'color: #4caf50;');
-            console.log('%cadd1000() - добавить 1000 рублей', 'color: #4caf50;');
-            console.log('%cadd5000() - добавить 5000 рублей', 'color: #4caf50;');
-            console.log('%cadd10000() - добавить 10000 рублей', 'color: #4caf50;');
-            console.log('%cadd50000() - добавить 50000 рублей', 'color: #4caf50;');
-            console.log('%cУправление деньгами:', 'color: #ff9800; font-weight: bold;');
-            console.log('%cclearMoney() - очистить деньги (оставить 1000₽)', 'color: #ff9800;');
-            console.log('%cresetAll() - полный сброс (деньги + улучшения)', 'color: #ff9800;');
-            console.log('%cУлучшения:', 'color: #9c27b0; font-weight: bold;');
-            console.log('%cmaxUpgrades() - получить много денег и макс. улучшения', 'color: #9c27b0;');
+            console.log('%cОсновные команды:', 'color: #4caf50; font-weight: bold;');
+            console.log('%cadmin() - активировать режим администратора', 'color: #2196f3;');
+            console.log('%csetMoney(сумма) - установить точную сумму денег', 'color: #ff9800;');
+            console.log('%caddMoney(сумма) - добавить сумму денег', 'color: #4caf50;');
+            console.log('%cclearMoney() - очистить деньги (оставить 1000₽)', 'color: #4caf50;');
+            console.log('%cresetAll() - полный сброс (деньги + улучшения)', 'color: #4caf50;');
+            console.log('%cАдмин команды (после admin()):', 'color: #ff9800; font-weight: bold;');
+            console.log('%cgiveMoney(имя, сумма) - выдать деньги другому', 'color: #9c27b0;');
+            console.log('%cresetUser(имя) - сбросить пользователя', 'color: #9c27b0;');
+            console.log('%cviewAllUsers() - посмотреть всех пользователей', 'color: #9c27b0;');
+            console.log('%cБыстрые команды:', 'color: #2196f3; font-weight: bold;');
+            console.log('%cadd1000(), add5000(), add10000(), add50000()', 'color: #4caf50;');
+            console.log('%cmaxUpgrades() - макс. улучшения', 'color: #9c27b0;');
             console.log('%cИнформация:', 'color: #2196f3; font-weight: bold;');
             console.log('%cshowMoneyCommands() - показать этот список команд', 'color: #2196f3;');
-            console.log('========================================');
+            console.log('=========================================');
             
             showNotification('Команды показаны в консоли (F12)', 'info');
         };
@@ -1626,11 +2060,10 @@
         // Автоматически показываем команды при загрузке
         setTimeout(() => {
             console.log('%c💰 Управление деньгами:', 'color: #4fc3f7; font-size: 14px;');
-            console.log('%c1. Кнопки над балансом (+1к, +10к, 🚀, 🗑️)', 'color: #4caf50;');
+            console.log('%c1. Кнопки над балансом (+1к, +10к, 💰, 🚀, 🗑️, 👑)', 'color: #4caf50;');
             console.log('%c2. Команды в консоли: showMoneyCommands()', 'color: #4caf50;');
+            console.log('%c3. Для админ-прав введите: admin()', 'color: #ff9800; font-weight: bold;');
         }, 2000);
     </script>
 </body>
 </html>
-
-
